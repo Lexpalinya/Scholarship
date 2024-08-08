@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model About {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean  @default(true)
+  images    String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  isActive    Boolean  @default(true)
+  url_path    String
+  services_id String   @db.VarChar(36)
+  image       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  services    Services @relation(fields: [services_id], references: [id])
+}
+
+model Comment {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  isActive    Boolean  @default(true)
+  name        String
+  email       String
+  phoneNumber String  @default("")
+  comment     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String     @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean    @default(true)
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  services  Services[]
+}
+
+model Services {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  title       String
+  isActive    Boolean  @default(true)
+  description String
+  file_url    String
+  category_id String   @db.VarChar(36)
+  image       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  category    Category @relation(fields: [category_id], references: [id])
+  banner      Banner[]
+  news        News[]
+}
+
+model News {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  isActive    Boolean  @default(true)
+  title       String
+  detail      String
+  services_id String   @db.VarChar(36)
+  image       String
+  start_time  DateTime
+  end_time    DateTime
+  services    Services @relation(fields: [services_id], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean   @default(true)
+  username  String
+  email     String
+  password  String
+  role      UserRoles @default(admin)
+  profile   String    @default("")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum UserRoles {
+  admin
+  superadmin
+}
