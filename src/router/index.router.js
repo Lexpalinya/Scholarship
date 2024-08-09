@@ -12,6 +12,7 @@ const route = express.Router();
 
 const about = `/about`;
 
+
 route.post(`${about}/insert`,auth, AboutConttroller.Insert);
 route.put(`${about}/update/:id`,auth, AboutConttroller.Update);
 

@@ -15,7 +15,7 @@ import {
 import { UploadImage } from "../services/uploadImage.js";
 import { DataExist, ValidateBanner } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
-let key = "banners";
+let key = "banners-scholarship";
 let model = "banner";
 let select;
 const BannerController = {

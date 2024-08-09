@@ -13,7 +13,7 @@ import {
 } from "../services/service.js";
 import { DataExist, ValidateComment } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
-let key = "comments";
+let key = "comments-scholarship";
 let model = "comment";
 let select;
 

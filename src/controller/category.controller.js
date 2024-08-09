@@ -8,7 +8,7 @@ import {
 import { SendError, SendErrorCatch, SendSuccess } from "../services/service.js";
 import { DataExist, ValidateCategory } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
-let key = "categorys";
+let key = "categorys-scholarship";
 let select;
 let model = "category";
 const CategoryController = {

@@ -14,7 +14,7 @@ import {
 } from "../services/service.js";
 import { UploadImage } from "../services/uploadImage.js";
 import prisma from "../util/prismaClient.js";
-let key = "abouts";
+let key = "abouts-scholarship";
 let model = "about";
 let select;
 const AboutConttroller = {

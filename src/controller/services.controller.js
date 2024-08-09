@@ -15,7 +15,7 @@ import {
 import { UploadImage } from "../services/uploadImage.js";
 import { DataExist, ValidateServices } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
-let key = "services";
+let key = "services-scholarship";
 let model = "services";
 let select;
 const ServicesController = {

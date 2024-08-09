@@ -26,7 +26,7 @@ import {
 } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 import redis from "../DB/redis.js";
-let key = "users";
+let key = "users-scholarship";
 let model = "user";
 let select;
 const UserController = {

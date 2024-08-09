@@ -15,7 +15,7 @@ import {
 import { UploadImage } from "../services/uploadImage.js";
 import { DataExist, ValidateNews } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
-let key = "news";
+let key = "news-scholarship";
 let model = "news";
 let select;
 const NewsController = {
