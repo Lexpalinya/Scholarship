@@ -105,31 +105,31 @@ const findinCached = async (key, model, where, select) => {
 };
 
 export const findServicesById = (id) => {
-  return findinCached("services", "services", { id, isActive: true });
+  return findinCached("services-scholarship", "services", { id, isActive: true });
 };
 
 export const findCategoryById = (id) => {
-  return findinCached("categorys", "category", { id, isActive: true });
+  return findinCached("categorys-scholarship", "category", { id, isActive: true });
 };
 
 export const findAboutByid = (id) => {
-  return findinCached("abouts", "about", { id, isActive: true });
+  return findinCached("abouts-scholarship", "about", { id, isActive: true });
 };
 
 export const findBannerById = (id) => {
-  return findinCached("banners", "banner", { id, isActive: true });
+  return findinCached("banners-scholarship", "banner", { id, isActive: true });
 };
 
 export const findCommentById = (id) => {
-  return findinCached("comments", "comment", { id, isActive: true });
+  return findinCached("comments-scholarship", "comment", { id, isActive: true });
 };
 
 export const findNewsById = (id) => {
-  return findinCached("news", "news", { id, isActive: true });
+  return findinCached("news-scholarship", "news", { id, isActive: true });
 };
 
 export const findUsersById = (id) => {
-  return findinCached("users", "user", { id, isActive: true });
+  return findinCached("users-scholarship", "user", { id, isActive: true });
 };
 
 export const ExistingUser = ({ username, email }) => {
