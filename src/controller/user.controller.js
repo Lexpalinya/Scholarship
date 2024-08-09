@@ -64,7 +64,12 @@ const UserController = {
       }
       const hashPassword = await Endcrypt(password);
 
-      const img_url = await UploadImage(data.image.data);
+      const img_url = await UploadImage(data.image.data).then((url) => {
+        if (!url) {
+          throw new Error("Upload image failed");
+        }
+        return url;
+      });
       const user = await prisma.user.create({
         data: {
           username,
