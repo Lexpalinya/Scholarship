@@ -40,6 +40,11 @@ const checkDatabaseConnection = async () => {
     console.log("Prisma Connected to the DATABASE Success: OK");
   } catch (err) {
     console.error("Error Connecting to DATABASE Fail:", err);
+
+    setTimeout(async () => {
+      console.log("Attempting to reconnect Database");
+      await checkDatabaseConnection();
+    }, 60000);
   }
 };
 

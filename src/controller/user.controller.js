@@ -292,6 +292,7 @@ const UserController = {
   },
   async Login(req, res) {
     try {
+      // Validate the input data
       const validate = ValidateLogin(req.body);
       if (validate.length > 0) {
         return SendError(
@@ -300,38 +301,53 @@ const UserController = {
           `${EMessage.pleaseInput} : ${validate.join(", ")}`
         );
       }
+
       const { username, password } = req.body;
+
+      // Find the user by username and check if they are active
       const user = await prisma.user.findFirst({
         where: {
           username,
           isActive: true,
         },
       });
+
       if (!user) {
         return SendError(
           res,
           404,
-          `${EMessage.notFound}:user with username:${username}`
+          `${EMessage.notFound}: user with username: ${username}`
         );
       }
+
+      // Decrypt the stored password
       const decriptPassword = await Decrypt(user.password);
       let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
       passDecript = passDecript.replace(/"/g, "");
-
-      if (decriptPassword == !password) {
+      console.log('de :>> ', passDecript===password,passDecript,password);
+      // Compare the decrypted password with the provided password
+      if (passDecript!== password) {
         return SendError(res, 400, `${EMessage.loginFailed}`);
       }
-      const endcryptId = await Endcrypt(user.id);
-      // console.log('user.id :>> ', user.id);
-      const dataJWT = { id: endcryptId };
 
+      // Encrypt the user's ID to be used in the JWT token
+      const encryptedId =await  Endcrypt(user.id);
+
+      const dataJWT = { id: encryptedId };
+
+      // Generate a JWT token
       const token = await generateJWTtoken(dataJWT);
+
+      // Prepare the response with the user details and token
       const result = {
         ...user,
         token,
       };
+
+      // Send a success response
       return SendSuccess(res, `${EMessage.loginSuccess}`, result);
     } catch (error) {
+      // Handle any errors that occur during login
       return SendErrorCatch(res, `${EMessage.serverError} login`, error);
     }
   },
