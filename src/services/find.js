@@ -108,6 +108,21 @@ export const findServicesById = (id) => {
   return findinCached("services-scholarship", "services", {
     id,
     isActive: true,
+  },{
+    id: true,
+    isActive: true,
+    title: true,
+    description: true,
+    file_url: true,
+    category_id: true,
+    image: true,
+    createdAt: true,
+    updatedAt: true,
+    category: {
+      select: {
+        name: true,
+      },
+    },
   });
 };
 

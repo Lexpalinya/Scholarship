@@ -51,6 +51,7 @@ route.post(`${services}/insert`,auth, ServicesController.Insert);
 
 route.put(`${services}/update/:id`,auth, ServicesController.Update);
 route.put(`${services}/updateImage/:id`,auth, ServicesController.UpdateImage);
+route.put(`${services}/updateFile/:id`,auth, ServicesController.UpdateFile);
 
 route.delete(`${services}/delete/:id`,auth, ServicesController.Delete);
 

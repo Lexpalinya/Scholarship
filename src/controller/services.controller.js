@@ -12,12 +12,27 @@ import {
   SendErrorCatch,
   SendSuccess,
 } from "../services/service.js";
-import { UploadImage } from "../services/uploadImage.js";
+import { UploadFile, UploadImage } from "../services/uploadImage.js";
 import { DataExist, ValidateServices } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "services-scholarship";
 let model = "services";
-let select;
+let select = {
+  id: true,
+  isActive: true,
+  title: true,
+  description: true,
+  file_url: true,
+  category_id: true,
+  image: true,
+  createdAt: true,
+  updatedAt: true,
+  category: {
+    select: {
+      name: true,
+    },
+  },
+};
 const ServicesController = {
   async Insert(req, res) {
     try {
@@ -31,10 +46,16 @@ const ServicesController = {
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       }
-      if (!data || !data.image) {
-        return SendError(res, 400, `${EMessage.pleaseInput}: image `);
+      if (!data || !data.image || !data.file) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: ${
+            !data ? "image ,file" : !data.image ? "image" : "file"
+          } `
+        );
       }
-      const { title, description, file_url, category_id } = req.body;
+      const { title, description, category_id } = req.body;
 
       const categoryExists = await findCategoryById(category_id);
       if (!categoryExists) {
@@ -44,12 +65,21 @@ const ServicesController = {
           `${EMessage.notFound}: category with id ${category_id}`
         );
       }
-      const img_url = await UploadImage(data.image.data).then((url) => {
-        if (!url) {
-          throw new Error("Upload Image failed");
-        }
-        return url;
-      });
+
+      const [img_url, file_url] = await Promise.all([
+        UploadImage(data.image.data).then((url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
+        }),
+        UploadFile(data.file).then((url) => {
+          if (!url) {
+            throw new Error("Upload file failed");
+          }
+          return url;
+        }),
+      ]);
       const services = await prisma.services.create({
         data: {
           title,
@@ -94,22 +124,6 @@ const ServicesController = {
       const services = await prisma.services.update({
         where: { id },
         data,
-        select: {
-          id: true,
-          isActive: true,
-          title: true,
-          description: true,
-          file_url: true,
-          category_id: true,
-          image: true,
-          createdAt: true,
-          updatedAt: true,
-          category: {
-            select: {
-              name: true,
-            },
-          },
-        },
       });
       await redis.del(key, key + serviceExists.category_id);
       CacheAndRetriveUpdateData(key, model, select);
@@ -141,12 +155,14 @@ const ServicesController = {
           `${EMessage.notFound} service with id ${id}`
         );
       }
-      const img_url = await UploadImage(data.image.data).then((url) => {
-        if (!url) {
-          throw new Error("Upload Image failed");
+      const img_url = await UploadImage(data.image.data, oldImage).then(
+        (url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
         }
-        return url;
-      });
+      );
 
       const services = await prisma.services.update({
         where: { id },
@@ -161,6 +177,65 @@ const ServicesController = {
       return SendErrorCatch(
         res,
         `${EMessage.updateFailed} service image`,
+        error
+      );
+    }
+  },
+  async UpdateFile(req, res) {
+    try {
+      const id = req.params.id;
+      const { oldFile } = req.body;
+
+      if (!oldFile) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: oldFile is required`
+        );
+      }
+
+      if (!req.files || !req.files.file) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: file`);
+      }
+
+      const serviceExists = await findServicesById(id);
+      if (!serviceExists) {
+        return SendError(
+          res,
+          404,
+          `${EMessage.notFound} service with id ${id}`
+        );
+      }
+
+      let file_url;
+      try {
+        file_url = await UploadFile(req.files.file, oldFile);
+        if (!file_url) {
+          throw new Error("Upload file failed: No URL returned");
+        }
+      } catch (uploadError) {
+        console.error("File upload error:", uploadError);
+        return SendError(
+          res,
+          500,
+          `File upload failed: ${uploadError.message}`
+        );
+      }
+
+      const services = await prisma.services.update({
+        where: { id },
+        data: { file_url },
+      });
+
+      await redis.del(key, key + serviceExists.category_id);
+      await CacheAndRetriveUpdateData(key, model, select);
+
+      SendSuccess(res, `${EMessage.updateSuccess} service file`, services);
+    } catch (error) {
+      console.error("UpdateFile error:", error);
+      return SendErrorCatch(
+        res,
+        `${EMessage.updateFailed} service file`,
         error
       );
     }
@@ -235,6 +310,7 @@ const ServicesController = {
           orderBy: {
             createdAt: "desc",
           },
+          select,
           take: 200,
         });
         redis.set(key, JSON.stringify(services), "EX", 3600);
@@ -265,6 +341,7 @@ const ServicesController = {
           orderBy: {
             createdAt: "desc",
           },
+          select,
         });
         redis.set(key, JSON.stringify(services), "EX", 3600);
       } else {
