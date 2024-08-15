@@ -105,11 +105,34 @@ const findinCached = async (key, model, where, select) => {
 };
 
 export const findServicesById = (id) => {
-  return findinCached("services-scholarship", "services", { id, isActive: true });
+  return findinCached("services-scholarship", "services", {
+    id,
+    isActive: true,
+  });
 };
 
 export const findCategoryById = (id) => {
-  return findinCached("categorys-scholarship", "category", { id, isActive: true });
+  return findinCached(
+    "categorys-scholarship",
+    "category",
+    {
+      id,
+      isActive: true,
+    },
+    {
+      id: true,
+      isActive: true,
+      name: true,
+      userId: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    }
+  );
 };
 
 export const findAboutByid = (id) => {
@@ -121,7 +144,10 @@ export const findBannerById = (id) => {
 };
 
 export const findCommentById = (id) => {
-  return findinCached("comments-scholarship", "comment", { id, isActive: true });
+  return findinCached("comments-scholarship", "comment", {
+    id,
+    isActive: true,
+  });
 };
 
 export const findNewsById = (id) => {

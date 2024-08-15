@@ -4,12 +4,26 @@ import {
   CacheAndInsertData,
   CacheAndRetriveUpdateData,
   findCategoryById,
+  findUsersById,
 } from "../services/find.js";
 import { SendError, SendErrorCatch, SendSuccess } from "../services/service.js";
 import { DataExist, ValidateCategory } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "categorys-scholarship";
-let select;
+let select = {
+  id: true,
+  isActive: true,
+  name: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+  user: {
+    select: {
+      username: true,
+    },
+  },
+};
+
 let model = "category";
 const CategoryController = {
   async Insert(req, res) {
@@ -22,11 +36,16 @@ const CategoryController = {
           `${EMessage.pleaseInput} ${validate.join(", ")}`
         );
       }
-      const { name } = req.body;
+      const { name, userId } = req.body;
+      const userExists = await findUsersById(userId);
+      if (!userExists)
+        return SendError(res, 404, `${EMessage.notFound} user with ID ${id}`);
       const category = await prisma.category.create({
         data: {
           name,
+          userId,
         },
+        select,
       });
       CacheAndInsertData(key, model, category, select);
       return SendSuccess(res, `${EMessage.insertSuccess}`, category);
@@ -45,6 +64,15 @@ const CategoryController = {
           404,
           `${EMessage.notFound} category with id ${id}`
         );
+      }
+      if (data.userId) {
+        const userExists = await findUsersById(userId);
+        if (!userExists)
+          return SendError(
+            res,
+            404,
+            `${EMessage.notFound} user with ID ${data.userId}`
+          );
       }
       const category = await prisma.category.update({
         where: {

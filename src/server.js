@@ -78,7 +78,7 @@ redis.on("error", (err) => {
 //   }
 // };
 
-await redis.del("users");
+await redis.del("categorys-scholarship");
 
 // const user = await redis.get("users");
 // console.log('user :>> ', user);

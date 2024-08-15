@@ -18,8 +18,8 @@ export const DataExist = (data) => {
 };
 
 export const ValidateCategory = (data) => {
-  const { name } = data;
-  return validateData({ name });
+  const { name, userId } = data;
+  return validateData({ name, userId });
 };
 
 export const ValidateComment = (data) => {
