@@ -12,7 +12,7 @@ import {
   SendErrorCatch,
   SendSuccess,
 } from "../services/service.js";
-import { UploadImage } from "../services/uploadImage.js";
+import { UploadFile, UploadImage } from "../services/uploadImage.js";
 import { DataExist, ValidateBanner } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "banners-scholarship";
@@ -30,10 +30,14 @@ const BannerController = {
         );
       }
       const data = req.files;
-      if (!data || !data.image) {
-        return SendError(res, 400, `${EMessage.pleaseInput}: image `);
+      if (!data || !data.image || !data.url_path) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}:  image, url_path `
+        );
       }
-      const { url_path, services_id } = req.body;
+      const { services_id } = req.body;
 
       const serviceExists = await findServicesById(services_id);
       if (!serviceExists) {
@@ -43,15 +47,24 @@ const BannerController = {
           `${EMessage.notFound}: service with id ${services_id}`
         );
       }
-      const img_url = await UploadImage(data.image.data).then((url) => {
-        if (!url) {
-          throw new Error("Upload Image failed");
-        }
-        return url;
-      });
+      const [img_url, file_url_path] = await Promise.all([
+        UploadImage(data.image.data).then((url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
+        }),
+        UploadFile(data.url_path).then((url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
+        }),
+      ]);
+
       const banner = await prisma.banner.create({
         data: {
-          url_path,
+          url_path: file_url_path,
           services_id,
           image: img_url,
         },
@@ -132,6 +145,47 @@ const BannerController = {
         where: { id },
         data: {
           image: img_url,
+        },
+      });
+      await redis.del(key, key + bannerExists.services_id);
+      CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(res, `${EMessage.updateSuccess}`, banner);
+    } catch (error) {
+      return SendErrorCatch(res, `${EMessage.updateFailed}`, error);
+    }
+  },
+  async UpdateFile(req, res) {
+    try {
+      const id = req.params.id;
+      const { oldFile } = req.body;
+      const data = req.files;
+      if (!data || !data.file) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: file `);
+      }
+      if (!oldFile)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: oldFile is required`
+        );
+      const bannerExists = await findBannerById(id);
+      if (!bannerExists) {
+        return SendError(
+          res,
+          404,
+          `${EMessage.notFound}:banner with id ${id} `
+        );
+      }
+      const file_url = await UploadFile(data.file, oldFile).then((url) => {
+        if (!url) {
+          throw new Error("Upload file failed");
+        }
+        return url;
+      });
+      const banner = await prisma.banner.update({
+        where: { id },
+        data: {
+          url_path: file_url,
         },
       });
       await redis.del(key, key + bannerExists.services_id);
@@ -226,7 +280,11 @@ const BannerController = {
         banner = JSON.parse(cachedData);
       }
 
-    return  SendSuccess(res, `${EMessage.fetchAllSuccess} by service id`, banner);
+      return SendSuccess(
+        res,
+        `${EMessage.fetchAllSuccess} by service id`,
+        banner
+      );
     } catch (error) {
       return SendErrorCatch(
         res,

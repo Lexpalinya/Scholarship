@@ -66,6 +66,7 @@ route.post(`${banner}/insert`,auth,BannerController.Insert);
 
 route.put(`${banner}/update/:id`,auth,BannerController.Update);
 route.put(`${banner}/updateImage/:id`,auth,BannerController.UpdateImage);
+route.put(`${banner}/updateFile/:id`,auth,BannerController.UpdateFile);
 
 route.delete(`${banner}/delete/:id`,auth,BannerController.Delete);
 

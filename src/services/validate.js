@@ -28,8 +28,8 @@ export const ValidateComment = (data) => {
 };
 
 export const ValidateBanner = (data) => {
-  const { url_path, services_id } = data;
-  return validateData({ url_path, services_id });
+  const { services_id } = data;
+  return validateData({ services_id });
 };
 
 export const ValidateServices = (data) => {
