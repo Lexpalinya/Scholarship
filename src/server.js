@@ -1,5 +1,6 @@
 import express from "express";
 import morgan from "morgan";
+import cors from "cors";
 import fileUpload from "express-fileupload";
 import APIRouter from "./router/index.router.js";
 
@@ -20,16 +21,28 @@ app.use(fileUpload());
 app.use(morgan("dev"));
 
 // CORS Headers
-app.all("/*", (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Accept, Access-Token, X-Requested-With"
-  );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-});
+// app.all("/*", (req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type, Accept, Access-Token, X-Requested-With"
+//   );
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   next();
+// });
 
+app.use(
+  cors({
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Access-Token",
+      "Accept",
+    ],
+  })
+);
 // API Router
 app.use(EAPI, APIRouter);
 
