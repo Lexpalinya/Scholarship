@@ -192,19 +192,50 @@ const UserController = {
   },
   async SelectAll(req, res) {
     try {
-      const user = await CacheAndRetriveUpdateData(key, model, select);
-      return SendSuccess(res, EMessage.fetchAllSuccess, user);
+      const userData = await CacheAndRetriveUpdateData(key, model, select);
+
+      let users = [];
+      for (let user of userData) {
+        // console.log("user.id :>> ", user.id);
+
+        let decriptPassword = await Decrypt(user.password).catch((err) => {
+          console.error(
+            `Failed to decrypt password for user ${user.id}:`,
+            err.message
+          );
+          return null; // Handle as necessary, e.g., set password to null or an error message
+        });
+        let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
+        passDecript = passDecript.replace(/"/g, "");
+
+        user.password = passDecript;
+        users.push(user);
+      }
+
+      // Send success response with decrypted user data
+      return SendSuccess(res, EMessage.fetchAllSuccess, users);
     } catch (error) {
-      return SendErrorCatch(res, EMessage.deleteFailed, error);
+      // Send error response in case of failure
+      return SendErrorCatch(res, EMessage.errorFetchingAll, error);
     }
   },
   async SelectOne(req, res) {
     try {
       const id = req.params.id;
-      const user = await findUsersById(id);
+      let user = await findUsersById(id);
       if (!user) {
         return SendError(res, 404, `${EMessage.notFound} user with id :${id}`);
       }
+      let decriptPassword = await Decrypt(user.password).catch((err) => {
+        console.error(
+          `Failed to decrypt password for user ${user.id}:`,
+          err.message
+        );
+        return null; // Handle as necessary, e.g., set password to null or an error message
+      });
+      let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
+      passDecript = passDecript.replace(/"/g, "");
+      user.password = passDecript;
       return SendSuccess(res, EMessage.fetchAllSuccess, user);
     } catch (error) {
       return SendErrorCatch(res, EMessage.deleteFailed, error);

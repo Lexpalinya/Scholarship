@@ -49,7 +49,9 @@ export const CacheAndRetriveUpdateData = async (key, model, select) => {
         select,
         orderBy: { createdAt: "desc" },
       });
-
+      if(model==="user"){
+        
+      }
       await redis.set(key, JSON.stringify(data), "EX", 3600);
     } else {
       data = JSON.parse(cachedData);

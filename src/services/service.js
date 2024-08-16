@@ -33,15 +33,33 @@ export const CheckUniqueElement = (a, b) => {
 export const Decrypt = (hash) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const decoded = CryptoJS.AES.decrypt(hash, SECRET_KEY).toString(
-        CryptoJS.enc.Utf8
-      );
+      let decoded =  CryptoJS.AES.decrypt(hash, SECRET_KEY);
+      decoded = decoded.toString(CryptoJS.enc.Utf8);
+      // console.log("decoded :>> ", decoded);
       resolve(decoded);
     } catch (error) {
       reject(error);
     }
   });
 };
+
+// export const Decrypt1 = (hash, callback) => {
+//   try {
+//     const decoded = CryptoJS.AES.decrypt(hash, SECRET_KEY).toString(
+//       CryptoJS.enc.Utf8
+//     );
+
+//     if (!decoded) {
+//       throw new Error(
+//         "Decryption failed, possibly due to invalid input or key."
+//       );
+//     }
+
+//     callback(null, decoded);
+//   } catch (error) {
+//     callback(error, null);
+//   }
+// };
 
 export const Endcrypt = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -107,7 +125,7 @@ export const VerifyRefreshToken = (data) => {
     jwt.verify(data, SECRET_KEY, async (err, decoded) => {
       try {
         if (err) {
-          console.error('JWT Verification Error:', err);
+          console.error("JWT Verification Error:", err);
           return reject(err);
         }
 
@@ -116,7 +134,9 @@ export const VerifyRefreshToken = (data) => {
           return reject("Error: Could not decrypt the refresh token");
         }
 
-        let decryptedId = decryptedRefreshToken.toString(CryptoJS.enc.Utf8).replace(/"/g, "");
+        let decryptedId = decryptedRefreshToken
+          .toString(CryptoJS.enc.Utf8)
+          .replace(/"/g, "");
         if (!decryptedId) {
           return reject("Error: Invalid decrypted ID");
         }
@@ -126,9 +146,10 @@ export const VerifyRefreshToken = (data) => {
           return reject("Error: Could not decrypt user ID");
         }
 
-      
-        const user = await findUsersById(userId.toString(CryptoJS.enc.Utf8).replace(/"/g, ""));
-      
+        const user = await findUsersById(
+          userId.toString(CryptoJS.enc.Utf8).replace(/"/g, "")
+        );
+
         if (!user) {
           return reject("Error: User not found");
         }
