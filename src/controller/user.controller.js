@@ -83,11 +83,12 @@ const UserController = {
         },
       });
 
-      const encrypId = await Endcrypt(user.id);
-      const token = await generateJWTtoken({ id: encrypId });
-      const result = { ...user, token };
+      // const encrypId = await Endcrypt(user.id);
+      // const token = await generateJWTtoken({ id: encrypId });
+      // const result = { ...user, token };
       CacheAndInsertData(key, model, user, select);
-      return SendCreate(res, EMessage.insertSuccess, result);
+      // return SendCreate(res, EMessage.insertSuccess, result);
+      return SendCreate(res, EMessage.insertSuccess, user);
     } catch (error) {
       return SendErrorCatch(res, EMessage.insertFailed, error);
     }
@@ -308,13 +309,8 @@ const UserController = {
 
       const { username, password } = req.body;
 
-      // Find the user by username and check if they are active
-      const user = await prisma.user.findFirst({
-        where: {
-          username,
-          isActive: true,
-        },
-      });
+      const userData = await CacheAndRetriveUpdateData(key, model, select);
+      const user = userData.find((item) => username === item.username);
 
       if (!user) {
         return SendError(
@@ -328,7 +324,7 @@ const UserController = {
       const decriptPassword = await Decrypt(user.password);
       let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
       passDecript = passDecript.replace(/"/g, "");
-      console.log("de :>> ", passDecript === password, passDecript, password);
+      // console.log("de :>> ", passDecript === password, passDecript, password);
       // Compare the decrypted password with the provided password
       if (passDecript !== password) {
         return SendError(res, 400, `${EMessage.loginFailed}`);
@@ -349,10 +345,47 @@ const UserController = {
       };
 
       // Send a success response
-      return SendSuccess(res, `${EMessage.loginSuccess}`, result);
+      return SendSuccess(res, `${EMessage.loginSuccess}`, user);
     } catch (error) {
       // Handle any errors that occur during login
       return SendErrorCatch(res, `${EMessage.serverError} login`, error);
+    }
+  },
+
+  async UpdatePassword(req, res) {
+    try {
+      const id = req.params.id;
+      const { password } = req.body;
+      if (!password)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}:password is required`
+        );
+      const userExists = await findUsersById(id);
+      if (!userExists)
+        return SendError(res, 404, `${EMessage.notFound} user with id ${id}`);
+
+      const hashPassword = await Endcrypt(password);
+      const user = await prisma.user.update({
+        where: { id },
+        data: {
+          password: hashPassword,
+        },
+      });
+      await redis.del(key);
+      CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(
+        res,
+        `${EMessage.updateSuccess} password updated`,
+        user
+      );
+    } catch (error) {
+      return SendErrorCatch(
+        res,
+        `${EMessage.serverError} update password fail`,
+        error
+      );
     }
   },
 };

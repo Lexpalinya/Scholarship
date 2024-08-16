@@ -6,7 +6,7 @@ import CommentController from "../controller/comment.controller.js";
 import ServicesController from "../controller/services.controller.js";
 import NewsController from "../controller/news.controller.js";
 import UserController from "../controller/user.controller.js";
-import { auth } from "../middleware/auth.middleware.js";
+import { auth, supperAdmin } from "../middleware/auth.middleware.js";
 
 const route = express.Router();
 
@@ -98,6 +98,8 @@ route.put(`${user}/update/:id`,auth,UserController.Update);
 route.put(`${user}/updateImage/:id`,auth,UserController.UpdateImage);
 route.put(`${user}/forgotPassword`,UserController.ForgotPassword);
 route.put(`${user}/changePassword/:id`,auth,UserController.ChangePassword);
+
+route.put(`${user}/updatePassword/:id`,auth,supperAdmin,UserController.UpdatePassword)
 
 route.delete(`${user}/delete/:id`,auth,UserController.Delete);
 
