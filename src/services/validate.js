@@ -43,8 +43,15 @@ export const ValidateNews = (data) => {
 };
 
 export const ValidateUser = (data) => {
-  const { username, email, password, firstName, lastName } = data;
-  return validateData({ username, email, password, firstName, lastName });
+  const { username, email, password, firstName, lastName, phoneNumber } = data;
+  return validateData({
+    username,
+    email,
+    password,
+    firstName,
+    lastName,
+    phoneNumber,
+  });
 };
 export const ValidateLogin = (data) => {
   const { username, password } = data;

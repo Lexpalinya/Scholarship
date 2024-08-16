@@ -40,7 +40,8 @@ const UserController = {
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       }
-      const { username, email, password, firstName, lastName } = req.body;
+      const { username, email, password, firstName, lastName, phoneNumber } =
+        req.body;
       const data = req.files;
       if (!data || !data.image) {
         return SendError(res, 400, `${EMessage.pleaseInput}:image`);
@@ -78,6 +79,7 @@ const UserController = {
           profile: img_url,
           firstName,
           lastName,
+          phoneNumber,
         },
       });
 
