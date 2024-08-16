@@ -40,7 +40,7 @@ const UserController = {
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       }
-      const { username, email, password } = req.body;
+      const { username, email, password, firstName, lastName } = req.body;
       const data = req.files;
       if (!data || !data.image) {
         return SendError(res, 400, `${EMessage.pleaseInput}:image`);
@@ -76,6 +76,8 @@ const UserController = {
           email,
           password: hashPassword,
           profile: img_url,
+          firstName,
+          lastName,
         },
       });
 
@@ -324,14 +326,14 @@ const UserController = {
       const decriptPassword = await Decrypt(user.password);
       let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
       passDecript = passDecript.replace(/"/g, "");
-      console.log('de :>> ', passDecript===password,passDecript,password);
+      console.log("de :>> ", passDecript === password, passDecript, password);
       // Compare the decrypted password with the provided password
-      if (passDecript!== password) {
+      if (passDecript !== password) {
         return SendError(res, 400, `${EMessage.loginFailed}`);
       }
 
       // Encrypt the user's ID to be used in the JWT token
-      const encryptedId =await  Endcrypt(user.id);
+      const encryptedId = await Endcrypt(user.id);
 
       const dataJWT = { id: encryptedId };
 

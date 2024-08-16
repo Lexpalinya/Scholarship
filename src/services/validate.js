@@ -33,8 +33,8 @@ export const ValidateBanner = (data) => {
 };
 
 export const ValidateServices = (data) => {
-  const { title, description,  category_id } = data;
-  return validateData({ title, description,  category_id });
+  const { title, description, category_id } = data;
+  return validateData({ title, description, category_id });
 };
 
 export const ValidateNews = (data) => {
@@ -43,8 +43,8 @@ export const ValidateNews = (data) => {
 };
 
 export const ValidateUser = (data) => {
-  const { username, email, password } = data;
-  return validateData({ username, email, password });
+  const { username, email, password, firstName, lastName } = data;
+  return validateData({ username, email, password, firstName, lastName });
 };
 export const ValidateLogin = (data) => {
   const { username, password } = data;

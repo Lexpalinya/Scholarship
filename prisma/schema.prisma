@@ -89,6 +89,8 @@ model User {
   username  String
   email     String
   password  String
+  firstName String?
+  lastName  String?
   role      UserRoles  @default(admin)
   profile   String     @default("")
   createdAt DateTime   @default(now())
