@@ -49,8 +49,7 @@ export const CacheAndRetriveUpdateData = async (key, model, select) => {
         select,
         orderBy: { createdAt: "desc" },
       });
-      if(model==="user"){
-        
+      if (model === "user") {
       }
       await redis.set(key, JSON.stringify(data), "EX", 3600);
     } else {
@@ -107,25 +106,30 @@ const findinCached = async (key, model, where, select) => {
 };
 
 export const findServicesById = (id) => {
-  return findinCached("services-scholarship", "services", {
-    id,
-    isActive: true,
-  },{
-    id: true,
-    isActive: true,
-    title: true,
-    description: true,
-    file_url: true,
-    category_id: true,
-    image: true,
-    createdAt: true,
-    updatedAt: true,
-    category: {
-      select: {
-        name: true,
-      },
+  return findinCached(
+    "services-scholarship",
+    "services",
+    {
+      id,
+      isActive: true,
     },
-  });
+    {
+      id: true,
+      isActive: true,
+      title: true,
+      description: true,
+      file_url: true,
+      category_id: true,
+      image: true,
+      createdAt: true,
+      updatedAt: true,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+    }
+  );
 };
 
 export const findCategoryById = (id) => {

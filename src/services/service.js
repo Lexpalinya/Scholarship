@@ -29,53 +29,43 @@ export const CheckUniqueElement = (a, b) => {
   }
   return result;
 };
-
 export const Decrypt = (hash) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
-      let decoded =  CryptoJS.AES.decrypt(hash, SECRET_KEY);
+      let decoded = CryptoJS.AES.decrypt(hash, SECRET_KEY);
       decoded = decoded.toString(CryptoJS.enc.Utf8);
-      // console.log("decoded :>> ", decoded);
+
+      if (!decoded) {
+        throw new Error("Decryption failed, resulting in an empty string");
+      }
+
       resolve(decoded);
     } catch (error) {
-      reject(error);
+      console.error("Decryption error:", error.message);
+      reject(new Error("Failed to decrypt data."));
     }
   });
 };
 
-// export const Decrypt1 = (hash, callback) => {
-//   try {
-//     const decoded = CryptoJS.AES.decrypt(hash, SECRET_KEY).toString(
-//       CryptoJS.enc.Utf8
-//     );
-
-//     if (!decoded) {
-//       throw new Error(
-//         "Decryption failed, possibly due to invalid input or key."
-//       );
-//     }
-
-//     callback(null, decoded);
-//   } catch (error) {
-//     callback(error, null);
-//   }
-// };
-
-export const Endcrypt = (data) => {
-  return new Promise(async (resolve, reject) => {
+export const Encrypt = (data) => {
+  return new Promise((resolve, reject) => {
     try {
       const hash = CryptoJS.AES.encrypt(
         JSON.stringify(data),
         SECRET_KEY
       ).toString();
 
+      if (!hash) {
+        throw new Error("Encryption failed, resulting in an empty string");
+      }
+
       resolve(hash);
     } catch (error) {
-      reject(error);
+      console.error("Encryption error:", error.message);
+      reject(new Error("Failed to encrypt data."));
     }
   });
 };
-
 export const VerifyToken = (token) => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, SECRET_KEY, async (err, decoded) => {

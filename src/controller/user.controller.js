@@ -9,7 +9,7 @@ import {
 } from "../services/find.js";
 import {
   Decrypt,
-  Endcrypt,
+  Encrypt,
   SendCreate,
   SendError,
   SendErrorCatch,
@@ -63,7 +63,9 @@ const UserController = {
           );
         }
       }
-      const hashPassword = await Endcrypt(password);
+      const hashPassword = await Encrypt(password).catch((err) => {
+        throw new Error(err);
+      });
 
       const img_url = await UploadImage(data.image.data).then((url) => {
         if (!url) {
@@ -83,7 +85,7 @@ const UserController = {
         },
       });
 
-      // const encrypId = await Endcrypt(user.id);
+      // const encrypId = await Encrypt(user.id);
       // const token = await generateJWTtoken({ id: encrypId });
       // const result = { ...user, token };
       CacheAndInsertData(key, model, user, select);
@@ -121,8 +123,9 @@ const UserController = {
         }
       }
       if (data.password) {
-        data.password = await Endcrypt(data.password);
+        data.password = await Encrypt(data.password);
       }
+      data.isActive = true;
       const user = await prisma.user.update({
         where: {
           id,
@@ -193,22 +196,48 @@ const UserController = {
   async SelectAll(req, res) {
     try {
       const userData = await CacheAndRetriveUpdateData(key, model, select);
+      const users = [];
 
-      let users = [];
       for (let user of userData) {
-        // console.log("user.id :>> ", user.id);
+        try {
+          let decryptedPassword = await Decrypt(user.password).catch((err) => {
+            console.error(
+              `Initial decryption failed for user ${user.id}:`,
+              err.message
+            );
+            return null; // Attempt to handle failure gracefully
+          });
 
-        let decriptPassword = await Decrypt(user.password).catch((err) => {
+          if (decryptedPassword) {
+            let passDecrypted = decryptedPassword.toString(CryptoJS.enc.Utf8);
+            passDecrypted = passDecrypted.replace(/"/g, "");
+            user.password = passDecrypted;
+          } else {
+            // Retry decryption
+            decryptedPassword = await Decrypt(user.password).catch((err) => {
+              console.error(
+                `Retry decryption failed for user ${user.id}:`,
+                err.message
+              );
+              return null; // Final fallback
+            });
+
+            if (decryptedPassword) {
+              let passDecrypted = decryptedPassword.toString(CryptoJS.enc.Utf8);
+              passDecrypted = passDecrypted.replace(/"/g, "");
+              user.password = passDecrypted;
+            } else {
+              console.error(`Final decryption failed for user ${user.id}`);
+              user.password = null; // Or handle it as needed
+            }
+          }
+        } catch (error) {
           console.error(
-            `Failed to decrypt password for user ${user.id}:`,
-            err.message
+            `Error during decryption process for user ${user.id}:`,
+            error.message
           );
-          return null; // Handle as necessary, e.g., set password to null or an error message
-        });
-        let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
-        passDecript = passDecript.replace(/"/g, "");
-
-        user.password = passDecript;
+          user.password = null; // Or handle it as needed
+        }
         users.push(user);
       }
 
@@ -219,6 +248,7 @@ const UserController = {
       return SendErrorCatch(res, EMessage.errorFetchingAll, error);
     }
   },
+
   async SelectOne(req, res) {
     try {
       const id = req.params.id;
@@ -227,11 +257,11 @@ const UserController = {
         return SendError(res, 404, `${EMessage.notFound} user with id :${id}`);
       }
       let decriptPassword = await Decrypt(user.password).catch((err) => {
-        console.error(
-          `Failed to decrypt password for user ${user.id}:`,
-          err.message
-        );
-        return null; // Handle as necessary, e.g., set password to null or an error message
+        // console.error(
+        //   `Failed to decrypt password for user ${user.id}:`,
+        //   err.message
+        // );
+        // return null; // Handle as necessary, e.g., set password to null or an error message
       });
       let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
       passDecript = passDecript.replace(/"/g, "");
@@ -278,7 +308,7 @@ const UserController = {
           404,
           `${EMessage.notFound} user with phone number: ${phoneNumber}`
         );
-      const hasPassword = await Endcrypt(newPassword);
+      const hasPassword = await Encrypt(newPassword);
       const user = await prisma.user.update({
         where: {
           id: userExists.id,
@@ -310,7 +340,10 @@ const UserController = {
       decriptPass = decriptPass.replace(/"/g, "");
       if (oldPassword !== decriptPass)
         return SendError(res, 400, "Password does not match");
-      const hashPassword = await Endcrypt(newPassword);
+      const hashPassword = await Encrypt(password).catch((err) => {
+        throw new Error(err);
+      });
+
       const user = await prisma.user.update({
         where: {
           id,
@@ -341,7 +374,7 @@ const UserController = {
       const { username, password } = req.body;
 
       const userData = await CacheAndRetriveUpdateData(key, model, select);
-      const user = userData.find((item) => username === item.username);
+      const user = userData.find((item) => item.username == username);
 
       if (!user) {
         return SendError(
@@ -362,7 +395,7 @@ const UserController = {
       }
 
       // Encrypt the user's ID to be used in the JWT token
-      const encryptedId = await Endcrypt(user.id);
+      const encryptedId = await Encrypt(user.id);
 
       const dataJWT = { id: encryptedId };
 
@@ -376,7 +409,7 @@ const UserController = {
       };
 
       // Send a success response
-      return SendSuccess(res, `${EMessage.loginSuccess}`, user);
+      return SendSuccess(res, `${EMessage.loginSuccess}`, result);
     } catch (error) {
       // Handle any errors that occur during login
       return SendErrorCatch(res, `${EMessage.serverError} login`, error);
@@ -397,7 +430,9 @@ const UserController = {
       if (!userExists)
         return SendError(res, 404, `${EMessage.notFound} user with id ${id}`);
 
-      const hashPassword = await Endcrypt(password);
+      const hashPassword = await Encrypt(password).catch((err) => {
+        throw new Error(err);
+      });
       const user = await prisma.user.update({
         where: { id },
         data: {
