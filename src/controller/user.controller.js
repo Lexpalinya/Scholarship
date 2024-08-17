@@ -125,7 +125,7 @@ const UserController = {
       if (data.password) {
         data.password = await Encrypt(data.password);
       }
-      data.isActive = true;
+
       const user = await prisma.user.update({
         where: {
           id,
@@ -257,11 +257,11 @@ const UserController = {
         return SendError(res, 404, `${EMessage.notFound} user with id :${id}`);
       }
       let decriptPassword = await Decrypt(user.password).catch((err) => {
-        // console.error(
-        //   `Failed to decrypt password for user ${user.id}:`,
-        //   err.message
-        // );
-        // return null; // Handle as necessary, e.g., set password to null or an error message
+        console.error(
+          `Failed to decrypt password for user ${user.id}:`,
+          err.message
+        );
+        return null; // Handle as necessary, e.g., set password to null or an error message
       });
       let passDecript = decriptPassword.toString(CryptoJS.enc.Utf8);
       passDecript = passDecript.replace(/"/g, "");
