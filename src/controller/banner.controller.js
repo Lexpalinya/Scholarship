@@ -37,7 +37,7 @@ const BannerController = {
           `${EMessage.pleaseInput}:  image, url_path `
         );
       }
-      const { services_id } = req.body;
+      const { services_id, title } = req.body;
 
       const serviceExists = await findServicesById(services_id);
       if (!serviceExists) {
@@ -67,6 +67,7 @@ const BannerController = {
           url_path: file_url_path,
           services_id,
           image: img_url,
+          title,
         },
       });
       CacheAndInsertData(key, model, banner, select);

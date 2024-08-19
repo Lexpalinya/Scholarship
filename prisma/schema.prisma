@@ -24,6 +24,7 @@ model About {
 model Banner {
   id          String   @id @default(uuid()) @db.VarChar(36)
   isActive    Boolean  @default(true)
+  title       String @default("")
   url_path    String
   services_id String   @db.VarChar(36)
   image       String
