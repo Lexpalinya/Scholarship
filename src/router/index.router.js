@@ -83,6 +83,7 @@ route.post(`${news}/insert`, auth, NewsController.Insert);
 
 route.put(`${news}/update/:id`, auth, NewsController.Update);
 route.put(`${news}/updateImage/:id`, auth, NewsController.UpdateImage);
+route.put(`${news}/updateFile/:id`, auth,NewsController.UpdateFile);
 
 route.delete(`${news}/delete/:id`, auth, NewsController.Delete);
 
