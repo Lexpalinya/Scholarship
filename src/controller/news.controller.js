@@ -29,19 +29,20 @@ const NewsController = {
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       }
-      const { title, detail, services_id, start_time, end_time } = req.body;
+      // const { title, detail, services_id, start_time, end_time } = req.body;
+      const { title, detail } = req.body;
       const data = req.files;
       if (!data || !data.image || !data.file) {
         return SendError(res, 400, `${EMessage.pleaseInput}:  image, file `);
       }
-      const serviceExists = await findServicesById(services_id);
-      if (!serviceExists) {
-        return SendError(
-          res,
-          404,
-          `${EMessage.notFound}: service with id ${services_id}`
-        );
-      }
+      // const serviceExists = await findServicesById(services_id);
+      // if (!serviceExists) {
+      //   return SendError(
+      //     res,
+      //     404,
+      //     `${EMessage.notFound}: service with id ${services_id}`
+      //   );
+      // }
       const [img_url, file_url_path] = await Promise.all([
         UploadImage(data.image.data).then((url) => {
           if (!url) {
@@ -61,9 +62,9 @@ const NewsController = {
         data: {
           title,
           detail,
-          services_id,
-          start_time,
-          end_time,
+          // services_id,
+          // start_time,
+          // end_time,
           image: img_url,
           file_url: file_url_path,
         },

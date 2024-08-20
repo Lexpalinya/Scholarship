@@ -69,7 +69,7 @@ model Services {
   updatedAt   DateTime @updatedAt
   category    Category @relation(fields: [category_id], references: [id])
   banner      Banner[]
-  news        News[]
+  // news        News[]
 }
 
 model News {
@@ -77,12 +77,12 @@ model News {
   isActive    Boolean  @default(true)
   title       String
   detail      String
-  services_id String   @db.VarChar(36)
+  // services_id String   @db.VarChar(36)
   image       String
   file_url    String   @default("")
-  start_time  DateTime
-  end_time    DateTime
-  services    Services @relation(fields: [services_id], references: [id])
+  // start_time  DateTime
+  // end_time    DateTime
+  // services    Services @relation(fields: [services_id], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

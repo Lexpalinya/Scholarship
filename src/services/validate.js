@@ -38,8 +38,10 @@ export const ValidateServices = (data) => {
 };
 
 export const ValidateNews = (data) => {
-  const { title, detail, services_id, start_time, end_time } = data;
-  return validateData({ title, detail, services_id, start_time, end_time });
+  // const { title, detail, services_id, start_time, end_time } = data;
+  // return validateData({ title, detail, services_id, start_time, end_time });
+  const { title, detail,} = data;
+  return validateData({ title, detail });
 };
 
 export const ValidateUser = (data) => {
