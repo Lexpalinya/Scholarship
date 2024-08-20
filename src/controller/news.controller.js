@@ -87,13 +87,13 @@ const NewsController = {
       if (!newsExists) {
         return SendError(res, 404, `${EMessage.notFound}news with id ${id}`);
       }
-      if (data.services_id && !serviceExists) {
-        return SendError(
-          res,
-          404,
-          `${EMessage.notFound} services with id ${id}`
-        );
-      }
+      // if (data.services_id && !serviceExists) {
+      //   return SendError(
+      //     res,
+      //     404,
+      //     `${EMessage.notFound} services with id ${id}`
+      //   );
+      // }
       const news = await prisma.news.update({ where: { id }, data });
       await redis.del(key);
       CacheAndRetriveUpdateData(key, model, select);
