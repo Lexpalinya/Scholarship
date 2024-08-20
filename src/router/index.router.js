@@ -65,12 +65,14 @@ route.get(
   `${banner}/selByServiceId/:id`,
   BannerController.SelectionByServiceId
 );
+route.get(`${banner}/selByIsPublished`, BannerController.SelectisPublished)
 
 route.post(`${banner}/insert`, auth, BannerController.Insert);
 
 route.put(`${banner}/update/:id`, auth, BannerController.Update);
 route.put(`${banner}/updateImage/:id`, auth, BannerController.UpdateImage);
 route.put(`${banner}/updateFile/:id`, auth, BannerController.UpdateFile);
+route.put(`${banner}/updateIsPublished/:id`,auth, BannerController.UpdateIsPublished);
 
 route.delete(`${banner}/delete/:id`, auth, BannerController.Delete);
 
@@ -83,7 +85,7 @@ route.post(`${news}/insert`, auth, NewsController.Insert);
 
 route.put(`${news}/update/:id`, auth, NewsController.Update);
 route.put(`${news}/updateImage/:id`, auth, NewsController.UpdateImage);
-route.put(`${news}/updateFile/:id`, auth,NewsController.UpdateFile);
+route.put(`${news}/updateFile/:id`, auth, NewsController.UpdateFile);
 
 route.delete(`${news}/delete/:id`, auth, NewsController.Delete);
 

@@ -18,6 +18,7 @@ import prisma from "../util/prismaClient.js";
 let key = "banners-scholarship";
 let model = "banner";
 let select;
+let where = { isActive: true };
 const BannerController = {
   async Insert(req, res) {
     try {
@@ -37,7 +38,7 @@ const BannerController = {
           `${EMessage.pleaseInput}:  image, url_path `
         );
       }
-      const { services_id, title,detail } = req.body;
+      const { services_id, title, detail } = req.body;
 
       const serviceExists = await findServicesById(services_id);
       if (!serviceExists) {
@@ -68,7 +69,7 @@ const BannerController = {
           services_id,
           image: img_url,
           title,
-          detail
+          detail,
         },
       });
       CacheAndInsertData(key, model, banner, select);
@@ -191,10 +192,46 @@ const BannerController = {
         },
       });
       await redis.del(key, key + bannerExists.services_id);
-      CacheAndRetriveUpdateData(key, model, select);
+      await CacheAndRetriveUpdateData(key, model, select);
       return SendSuccess(res, `${EMessage.updateSuccess}`, banner);
     } catch (error) {
       return SendErrorCatch(res, `${EMessage.updateFailed}`, error);
+    }
+  },
+
+  async UpdateIsPublished(req, res) {
+    try {
+      const id = req.params.id;
+      let { isPublished } = req.body;
+      if (!isPublished)
+        return SendError(res, 400, `${EMessage.pleaseInput}:isPublished`);
+
+      isPublished =
+        typeof isPublished === "boolean"
+          ? isPublished
+          : isPublished === "true"
+          ? true
+          : false;
+
+      const bannerExists = await findBannerById(id);
+      if (!bannerExists) {
+        return SendError(
+          res,
+          404,
+          `${EMessage.notFound}:banner with id ${id} `
+        );
+      }
+      const banner = await prisma.banner.update({
+        where: {
+          id,
+        },
+        data: { isPublished },
+      });
+      await redis.del(key, key + bannerExists.services_id);
+      await CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(res, `${EMessage.updateSuccess}`, banner);
+    } catch (error) {
+      return SendErrorCatch(res, `${EMessage.updateFailed} isPublished`, error);
     }
   },
   async Delete(req, res) {
@@ -224,6 +261,15 @@ const BannerController = {
   async SelectAll(req, res) {
     try {
       const banner = await CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, banner);
+    } catch (error) {
+      return SendErrorCatch(res, `${EMessage.errorFetchingAll}`, error);
+    }
+  },
+  async SelectisPublished(req, res) {
+    try {
+      const bannerData = await CacheAndRetriveUpdateData(key, model, select);
+      const banner = bannerData.filter((item) => item.isPublished === true);
       return SendSuccess(res, `${EMessage.fetchAllSuccess}`, banner);
     } catch (error) {
       return SendErrorCatch(res, `${EMessage.errorFetchingAll}`, error);
