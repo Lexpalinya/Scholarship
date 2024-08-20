@@ -13,6 +13,7 @@ import {
   SendSuccess,
 } from "../services/service.js";
 import { UploadImage } from "../services/uploadImage.js";
+import { DataExist, ValidateAbout } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "abouts-scholarship";
 let model = "about";
@@ -20,6 +21,14 @@ let select;
 const AboutConttroller = {
   async Insert(req, res) {
     try {
+      const validate = ValidateAbout(req.body);
+      if (validate.length > 0)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput} ${validate.join(", ")}`
+        );
+      const { title } = req.body;
       const data = req.files;
       if (!data || !data.images) {
         return SendError(res, 400, `${EMessage.pleaseInput}:images`);
@@ -57,6 +66,7 @@ const AboutConttroller = {
       // Insert the data into the database
       const about = await prisma.about.create({
         data: {
+          title,
           images: images_url_List,
         },
         select,
@@ -72,7 +82,7 @@ const AboutConttroller = {
       return SendErrorCatch(res, `${EMessage.insertFailed} about`, error);
     }
   },
-  async Update(req, res) {
+  async UpdateImages(req, res) {
     try {
       const id = req.params.id;
       const data = req.files;
@@ -129,6 +139,27 @@ const AboutConttroller = {
     }
   },
 
+  async Update(req, res) {
+    try {
+      const id = req.params.id;
+      const data = DataExist(req.body);
+      const aboutExists = await findAboutByid(id);
+
+      if (!aboutExists) {
+        return SendError(res, 404, `${EMessage.notFound} about with id:${id}`);
+      }
+
+      const about = await prisma.about.update({
+        where: { id },
+        data,
+      });
+      await redis.del(key);
+      CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(res, `${EMessage.deleteSuccess} `, about);
+    } catch (error) {
+      return SendErrorCatch(res, `${EMessage.deleteFailed} category`, error);
+    }
+  },
   async Delete(req, res) {
     try {
       const id = req.params.id;

@@ -62,6 +62,7 @@ export const CacheAndRetriveUpdateData = async (key, model, select) => {
     throw error;
   }
 };
+
 export const CacheAndInsertData = async (key, model, newData, select) => {
   try {
     const cachedData = await redis.get(key);

@@ -21,6 +21,10 @@ export const ValidateCategory = (data) => {
   const { name, userId } = data;
   return validateData({ name, userId });
 };
+export const ValidateAbout = (data) => {
+  const { title } = data;
+  return validateData({ title });
+};
 
 export const ValidateComment = (data) => {
   const { name, email, comment } = data;
@@ -40,7 +44,7 @@ export const ValidateServices = (data) => {
 export const ValidateNews = (data) => {
   // const { title, detail, services_id, start_time, end_time } = data;
   // return validateData({ title, detail, services_id, start_time, end_time });
-  const { title, detail,} = data;
+  const { title, detail } = data;
   return validateData({ title, detail });
 };
 

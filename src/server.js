@@ -8,6 +8,7 @@ import { EAPI, SERVER_PORT } from "./config/config.api.js";
 import prisma from "./util/prismaClient.js";
 import redis from "./DB/redis.js";
 
+
 // Redis event listeners
 
 const app = express();
@@ -83,7 +84,6 @@ redis.on("error", (err) => {
 // const user = await redis.get("users");
 // console.log('user :>> ', user);
 // Start Server
-
 app.listen(SERVER_PORT, async () => {
   console.log(`Server is listening on http://localhost:${SERVER_PORT}`);
   console.log(`Server Already: ${SERVER_PORT}`);

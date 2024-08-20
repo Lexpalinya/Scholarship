@@ -14,6 +14,7 @@ const about = `/about`;
 
 route.post(`${about}/insert`, auth, AboutConttroller.Insert);
 route.put(`${about}/update/:id`, auth, AboutConttroller.Update);
+route.put(`${about}/updateImages/:id`, auth, AboutConttroller.UpdateImages);
 
 route.delete(`${about}/delete/:id`, auth, AboutConttroller.Delete);
 
