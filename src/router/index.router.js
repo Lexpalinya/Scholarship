@@ -121,7 +121,7 @@ route.delete(`${user}/delete/:id`, auth, UserController.Delete);
 //---------companydata------------------
 
 const companyData = `/companyData`;
-route.get(`${companyData}/selAll`, auth, CompanyDataController.SelectAll);
+route.get(`${companyData}/selAll`, CompanyDataController.SelectAll);
 route.post(`${companyData}/insert`, auth, CompanyDataController.Insert);
 
 route.put(`${companyData}/update/:id`, auth, CompanyDataController.Update);
