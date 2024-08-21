@@ -8,6 +8,7 @@ import NewsController from "../controller/news.controller.js";
 import UserController from "../controller/user.controller.js";
 import { auth, supperAdmin } from "../middleware/auth.middleware.js";
 import CompanyDataController from "../controller/companydata.controller.js";
+import CoverImageController from "../controller/coverImage.controller.js";
 
 const route = express.Router();
 
@@ -132,5 +133,15 @@ route.put(
 );
 
 route.delete(`${companyData}/delete/:id`, auth, CompanyDataController.Delete);
+
+const coverImage = "/coverImage";
+route.get(`${coverImage}/selAll`, CoverImageController.SelectAll);
+route.post(`${coverImage}/insert`, auth, CoverImageController.Insert);
+route.put(
+  `${coverImage}/updateImage/:id`,
+  auth,
+  CoverImageController.UpdateImage
+);
+route.delete(`${coverImage}/delete/:id`, auth, CoverImageController.Delete);
 
 export default route;

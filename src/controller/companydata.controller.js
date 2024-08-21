@@ -60,7 +60,7 @@ const CompanyDataController = {
       });
       await redis.del(key);
       await redis.set(key, JSON.stringify([company]));
-      return SendCreate(res, `${EMessage.updateSuccess}`, company);
+      return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {
       return SendErrorCatch(
         res,
@@ -83,7 +83,7 @@ const CompanyDataController = {
       });
       await redis.del(key);
       await redis.set(key, JSON.stringify([company]));
-      return SendCreate(res, `${EMessage.updateSuccess}`, company);
+      return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {
       return SendErrorCatch(
         res,
@@ -123,8 +123,8 @@ const CompanyDataController = {
         },
       });
       await redis.del(key);
-    //   await redis.set(key, JSON.stringify([company]));
-      return SendCreate(res, `${EMessage.updateSuccess}`, company);
+      //   await redis.set(key, JSON.stringify([company]));
+      return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {
       return SendErrorCatch(
         res,

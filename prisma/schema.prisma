@@ -116,6 +116,13 @@ model companyData {
   updatedAt   DateTime @updatedAt
 }
 
+model coverImage {
+  id        Int      @id @default(autoincrement())
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum UserRoles {
   admin
   superadmin
