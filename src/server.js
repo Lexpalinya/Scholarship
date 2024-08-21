@@ -8,7 +8,6 @@ import { EAPI, SERVER_PORT } from "./config/config.api.js";
 import prisma from "./util/prismaClient.js";
 import redis from "./DB/redis.js";
 
-
 // Redis event listeners
 
 const app = express();

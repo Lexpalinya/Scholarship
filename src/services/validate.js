@@ -72,3 +72,8 @@ export const VaildateForgotPassword = (data) => {
   const { email, newPassword } = data;
   return validateData({ email, newPassword });
 };
+
+export const ValidateCompanyData = (data) => {
+  const { title, description } = data;
+  return validateData({ title, description });
+};

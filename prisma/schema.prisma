@@ -107,6 +107,15 @@ model User {
   @@index([email])
 }
 
+model companyData {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  icon        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum UserRoles {
   admin
   superadmin

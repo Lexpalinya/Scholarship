@@ -7,6 +7,7 @@ import ServicesController from "../controller/services.controller.js";
 import NewsController from "../controller/news.controller.js";
 import UserController from "../controller/user.controller.js";
 import { auth, supperAdmin } from "../middleware/auth.middleware.js";
+import CompanyDataController from "../controller/companydata.controller.js";
 
 const route = express.Router();
 
@@ -66,14 +67,18 @@ route.get(
   `${banner}/selByServiceId/:id`,
   BannerController.SelectionByServiceId
 );
-route.get(`${banner}/selByIsPublished`, BannerController.SelectisPublished)
+route.get(`${banner}/selByIsPublished`, BannerController.SelectisPublished);
 
 route.post(`${banner}/insert`, auth, BannerController.Insert);
 
 route.put(`${banner}/update/:id`, auth, BannerController.Update);
 route.put(`${banner}/updateImage/:id`, auth, BannerController.UpdateImage);
 route.put(`${banner}/updateFile/:id`, auth, BannerController.UpdateFile);
-route.put(`${banner}/updateIsPublished/:id`,auth, BannerController.UpdateIsPublished);
+route.put(
+  `${banner}/updateIsPublished/:id`,
+  auth,
+  BannerController.UpdateIsPublished
+);
 
 route.delete(`${banner}/delete/:id`, auth, BannerController.Delete);
 
@@ -112,5 +117,20 @@ route.put(
 );
 
 route.delete(`${user}/delete/:id`, auth, UserController.Delete);
+
+//---------companydata------------------
+
+const companyData = `/companyData`;
+route.get(`${companyData}/selAll`, auth, CompanyDataController.SelectAll);
+route.post(`${companyData}/insert`, auth, CompanyDataController.Insert);
+
+route.put(`${companyData}/update/:id`, auth, CompanyDataController.Update);
+route.put(
+  `${companyData}/updateIcon/:id`,
+  auth,
+  CompanyDataController.UpdateImage
+);
+
+route.delete(`${companyData}/delete/:id`, auth, CompanyDataController.Delete);
 
 export default route;
