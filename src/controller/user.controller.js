@@ -282,7 +282,7 @@ const UserController = {
         );
 
       const result = await VerifyRefreshToken(refreshToken);
-      if (!result) return SendError(res, "Error Generating refresh token");
+      if (!result) return SendError(res, 401, "Error Generating refresh token");
       return SendSuccess(res, `${EMessage.refreshTokenSuccess}`, result);
     } catch (error) {
       return SendErrorCatch(
@@ -294,7 +294,7 @@ const UserController = {
   },
   async ForgotPassword(req, res) {
     try {
-      const validate = VaildateForgotPassword(req.body);
+      const validate = VaildateForgotPassword(req.bFody);
       if (validate.length > 0) {
         return SendError(res, 400, "Please input:" + validate.join(","));
       }
@@ -340,7 +340,7 @@ const UserController = {
       decriptPass = decriptPass.replace(/"/g, "");
       if (oldPassword !== decriptPass)
         return SendError(res, 400, "Password does not match");
-      const hashPassword = await Encrypt(password).catch((err) => {
+      const hashPassword = await Encrypt(newPassword).catch((err) => {
         throw new Error(err);
       });
 

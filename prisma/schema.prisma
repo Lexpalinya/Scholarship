@@ -29,11 +29,11 @@ model Banner {
   detail      String   @default("")
   isPublished Boolean  @default(true)
   url_path    String
-  services_id String   @db.VarChar(36)
+  // services_id String   @db.VarChar(36)
   image       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  services    Services @relation(fields: [services_id], references: [id])
+  // services    Services @relation(fields: [services_id], references: [id])
 }
 
 model Comment {
@@ -69,7 +69,7 @@ model Services {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   category    Category @relation(fields: [category_id], references: [id])
-  banner      Banner[]
+  // banner      Banner[]
   // news        News[]
 }
 

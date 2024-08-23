@@ -32,8 +32,8 @@ export const ValidateComment = (data) => {
 };
 
 export const ValidateBanner = (data) => {
-  const { title, detail, services_id } = data;
-  return validateData({ services_id, title, detail });
+  const { title, detail } = data;
+  return validateData({ title, detail });
 };
 
 export const ValidateServices = (data) => {

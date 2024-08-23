@@ -38,16 +38,16 @@ const BannerController = {
           `${EMessage.pleaseInput}:  image, url_path `
         );
       }
-      const { services_id, title, detail } = req.body;
-
-      const serviceExists = await findServicesById(services_id);
-      if (!serviceExists) {
-        return SendError(
-          res,
-          404,
-          `${EMessage.notFound}: service with id ${services_id}`
-        );
-      }
+      // const { services_id, title, detail } = req.body;
+      const { title, detail } = req.body;
+      // const serviceExists = await findServicesById(services_id);
+      // if (!serviceExists) {
+      //   return SendError(
+      //     res,
+      //     404,
+      //     `${EMessage.notFound}: service with id ${services_id}`
+      //   );
+      // }
       const [img_url, file_url_path] = await Promise.all([
         UploadImage(data.image.data).then((url) => {
           if (!url) {
@@ -66,7 +66,7 @@ const BannerController = {
       const banner = await prisma.banner.create({
         data: {
           url_path: file_url_path,
-          services_id,
+          // services_id,
           image: img_url,
           title,
           detail,
@@ -83,10 +83,10 @@ const BannerController = {
       const id = req.params.id;
       const data = DataExist(req.body);
       const promise = [findBannerById(id)];
-      if (data.services_id) {
-        promise.push(findServicesById(data.services_id));
-      }
-      const [bannerExists, serviceExists] = await Promise.all(promise);
+      // if (data.services_id) {
+      //   promise.push(findServicesById(data.services_id));
+      // }
+      const [bannerExists] = await Promise.all(promise);
       if (!bannerExists) {
         return SendError(
           res,
@@ -94,13 +94,13 @@ const BannerController = {
           `${EMessage.notFound}:banner with id ${id} `
         );
       }
-      if (data.services_id && !serviceExists) {
-        return SendError(
-          res,
-          400,
-          `${EMessage.notFound}:service with id ${id} `
-        );
-      }
+      // if (data.services_id && !serviceExists) {
+      //   return SendError(
+      //     res,
+      //     400,
+      //     `${EMessage.notFound}:service with id ${id} `
+      //   );
+      // }
       const banner = await prisma.banner.update({
         where: {
           id,
