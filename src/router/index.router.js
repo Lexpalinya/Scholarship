@@ -64,10 +64,10 @@ const banner = `/banner`;
 
 route.get(`${banner}/selAll`, BannerController.SelectAll);
 route.get(`${banner}/selOne/:id`, BannerController.SelectOne);
-route.get(
-  `${banner}/selByServiceId/:id`,
-  BannerController.SelectionByServiceId
-);
+// route.get(
+//   `${banner}/selByServiceId/:id`,
+//   BannerController.SelectionByServiceId
+// );
 route.get(`${banner}/selByIsPublished`, BannerController.SelectisPublished);
 
 route.post(`${banner}/insert`, auth, BannerController.Insert);
