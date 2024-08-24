@@ -45,7 +45,7 @@ export const UploadFile = async (file, oldFile) => {
       const cloudinaryUpload = await cloudinary.uploader.upload(filePath, {
         public_id: `FILE_${Date.now()}`,
         resource_type: "raw", // 'raw' for files like PDFs
-        format: "pdf", // Explicitly specify the format if you want it to be treated as a PDF
+        // format: "pdf", // Explicitly specify the format if you want it to be treated as a PDF
       });
 
       // Resolve the promise with the uploaded file's URL
