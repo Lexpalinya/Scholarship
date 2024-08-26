@@ -139,7 +139,7 @@ route.get(`${coverImage}/selAll`, CoverImageController.SelectAll);
 route.post(`${coverImage}/insert`, auth, CoverImageController.Insert);
 route.put(
   `${coverImage}/updateImage/:id`,
-  auth,
+  // auth,
   CoverImageController.UpdateImage
 );
 route.delete(`${coverImage}/delete/:id`, auth, CoverImageController.Delete);

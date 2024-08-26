@@ -35,7 +35,9 @@ const CompanyDataController = {
       const company = await prisma.companyData.create({
         data: { title, description, icon },
       });
-      await redis.set(key, JSON.stringify([company]));
+      await redis.del(key + "*");
+      await redis.set(key, JSON.stringify([company]), "EX", 3600);
+
       return SendCreate(res, `${EMessage.insertSuccess}`, company);
     } catch (error) {
       return SendErrorCatch(
@@ -81,8 +83,8 @@ const CompanyDataController = {
       const company = await prisma.companyData.delete({
         where: { id },
       });
-      await redis.del(key);
-      await redis.set(key, JSON.stringify([company]));
+      await redis.del(key + "*");
+      await redis.set(key, JSON.stringify([company]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {
       return SendErrorCatch(
@@ -122,8 +124,8 @@ const CompanyDataController = {
           icon,
         },
       });
-      await redis.del(key);
-      //   await redis.set(key, JSON.stringify([company]));
+      await redis.del(key + "*");
+      await redis.set(key, JSON.stringify([company]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {
       return SendErrorCatch(

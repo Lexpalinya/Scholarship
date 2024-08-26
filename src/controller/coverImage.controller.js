@@ -23,7 +23,8 @@ const CoverImageController = {
       const coverImage = await prisma.coverImage.create({
         data: { image },
       });
-      await redis.set(key, JSON.stringify([coverImage]));
+      await redis.del(key + "*");
+      await redis.set(key, JSON.stringify([coverImage]), "EX", 3600);
       return SendCreate(res, `${EMessage.insertSuccess}`, coverImage);
     } catch (error) {
       return SendErrorCatch(
@@ -45,8 +46,8 @@ const CoverImageController = {
       const coverImage = await prisma.coverImage.delete({
         where: { id },
       });
-      await redis.del(key);
-      //   await redis.set(key, JSON.stringify([coverImage]));
+      await redis.del(key + "*");
+
       return SendSuccess(res, `${EMessage.deleteSuccess}`, coverImage);
     } catch (error) {
       return SendErrorCatch(
@@ -87,8 +88,8 @@ const CoverImageController = {
           image,
         },
       });
-      await redis.del(key);
-      await redis.set(key, JSON.stringify([coverImage]));
+      await redis.del(key + "*");
+      await redis.set(key, JSON.stringify([coverImage]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, coverImage);
     } catch (error) {
       return SendErrorCatch(
@@ -101,7 +102,7 @@ const CoverImageController = {
   async SelectAll(req, res) {
     try {
       const cachData = await redis.get(key);
-    //   console.log("cachData :>> ", JSON.parse(cachData));
+      //   console.log("cachData :>> ", JSON.parse(cachData));
       let company;
       if (!cachData) {
         company = await prisma.coverImage.findMany({});
