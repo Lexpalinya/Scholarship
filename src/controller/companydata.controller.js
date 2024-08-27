@@ -142,7 +142,7 @@ const CompanyDataController = {
       let company;
       if (!cachData) {
         company = await prisma.companyData.findMany({});
-        await redis.set(key, JSON.stringify([company]));
+        await redis.set(key, JSON.stringify(company));
       } else {
         company = JSON.parse(cachData);
       }
