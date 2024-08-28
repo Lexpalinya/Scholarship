@@ -23,7 +23,7 @@ const CoverImageController = {
       const coverImage = await prisma.coverImage.create({
         data: { image },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([coverImage]), "EX", 3600);
       return SendCreate(res, `${EMessage.insertSuccess}`, coverImage);
     } catch (error) {
@@ -46,7 +46,7 @@ const CoverImageController = {
       const coverImage = await prisma.coverImage.delete({
         where: { id },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
 
       return SendSuccess(res, `${EMessage.deleteSuccess}`, coverImage);
     } catch (error) {
@@ -88,7 +88,7 @@ const CoverImageController = {
           image,
         },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([coverImage]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, coverImage);
     } catch (error) {
