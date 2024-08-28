@@ -106,7 +106,7 @@ const CoverImageController = {
       let company;
       if (!cachData) {
         company = await prisma.coverImage.findMany({});
-        await redis.set(key, JSON.stringify([company]));
+        await redis.set(key, JSON.stringify(company));
       } else {
         company = JSON.parse(cachData);
       }
