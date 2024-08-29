@@ -186,3 +186,17 @@ export const ExistingUser = ({ username, email }) => {
     OR: [{ username }, { email }],
   });
 };
+
+export const findDocumentsById = (id) => {
+  return findinCached("document-scholarship", "document", {
+    id,
+    isActive: true,
+  });
+};
+
+export const findTypeSholarshipById = (id) => {
+  return findinCached("typeSholarship-scholarship", "typeSholarship", {
+    id,
+    isActive: true,
+  });
+};

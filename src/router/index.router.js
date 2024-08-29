@@ -9,6 +9,8 @@ import UserController from "../controller/user.controller.js";
 import { auth, supperAdmin } from "../middleware/auth.middleware.js";
 import CompanyDataController from "../controller/companydata.controller.js";
 import CoverImageController from "../controller/coverImage.controller.js";
+import DocumentController from "../controller/document.controller.js";
+import TypeSholarshipController from "../controller/typeSholarship.controller.js";
 
 const route = express.Router();
 
@@ -144,4 +146,23 @@ route.put(
 );
 route.delete(`${coverImage}/delete/:id`, auth, CoverImageController.Delete);
 
+const doc = "/document";
+route.get(`${doc}/selAll`, DocumentController.SelectAll);
+route.post(`${doc}/insert`, auth, DocumentController.Insert);
+route.put(`${doc}/update/:id`, auth, DocumentController.Update);
+route.delete(`${doc}/delete/:id`, auth, DocumentController.Delete);
+
+const typeSholarship = "/typeSholarship";
+route.get(`${typeSholarship}/selAll`, TypeSholarshipController.SelectAll);
+route.post(`${typeSholarship}/insert`, auth, TypeSholarshipController.Insert);
+route.put(
+  `${typeSholarship}/update/:id`,
+  auth,
+  TypeSholarshipController.Update
+);
+route.delete(
+  `${typeSholarship}/delete/:id`,
+  auth,
+  TypeSholarshipController.Delete
+);
 export default route;

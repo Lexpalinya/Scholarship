@@ -123,6 +123,22 @@ model coverImage {
   updatedAt DateTime @updatedAt
 }
 
+model document {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean  @default(true)
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model typeSholarship {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean  @default(true)
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum UserRoles {
   admin
   superadmin
