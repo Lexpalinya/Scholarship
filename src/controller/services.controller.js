@@ -7,6 +7,7 @@ import {
   findServicesById,
 } from "../services/find.js";
 import {
+  convertToJSON,
   SendCreate,
   SendError,
   SendErrorCatch,
@@ -55,8 +56,15 @@ const ServicesController = {
           } `
         );
       }
-      const { title, description, category_id } = req.body;
+      let { title, description, category_id, document, typescholarship } =
+        req.body;
 
+      if (document && !Array.isArray(document)) {
+        document = convertToJSON(document);
+      }
+      if (typescholarship && !Array.isArray(typescholarship)) {
+        typescholarship = convertToJSON(typescholarship);
+      }
       const categoryExists = await findCategoryById(category_id);
       if (!categoryExists) {
         return SendError(
@@ -87,6 +95,8 @@ const ServicesController = {
           file_url,
           category_id,
           image: img_url,
+          document,
+          typescholarship,
         },
       });
       await redis.del(key + category_id);
@@ -120,6 +130,12 @@ const ServicesController = {
           404,
           `${EMessage.notFound} category with id ${id}`
         );
+      }
+      if (data.document && !Array.isArray(data.document)) {
+        data.document = convertToJSON(data.document);
+      }
+      if (data.typescholarship && !Array.isArray(data.typescholarship)) {
+        data.typescholarship = convertToJSON(data.typescholarship);
       }
       const services = await prisma.services.update({
         where: { id },

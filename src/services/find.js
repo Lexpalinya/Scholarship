@@ -200,3 +200,9 @@ export const findTypeSholarshipById = (id) => {
     isActive: true,
   });
 };
+export const FindTypeSholarshipByReferId = (id) => {
+  return findMany("typeSholarship", {
+    isActive: true,
+    referid: id,
+  });
+};

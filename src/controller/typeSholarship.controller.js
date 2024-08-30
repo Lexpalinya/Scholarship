@@ -5,6 +5,7 @@ import {
   CacheAndRetriveUpdateData,
   findDocumentsById,
   findTypeSholarshipById,
+  FindTypeSholarshipByReferId,
 } from "../services/find.js";
 import { SendError, SendErrorCatch, SendSuccess } from "../services/service.js";
 import { DataExist } from "../services/validate.js";
@@ -16,11 +17,22 @@ let select;
 const TypeSholarshipController = {
   async Insert(req, res) {
     try {
-      const { text } = req.body;
-      if (!text) return SendError(res, 400, `${EMessage.pleaseInput}: text`);
+      let { referid, text } = req.body;
+      console.log("text :>> ", text);
+      if (!referid || !text)
+        return SendError(res, 400, `${EMessage.pleaseInput}: text,referid`);
+      if (!Array.isArray(text)) {
+        text = convertToJSON(text);
+        if (text) {
+          console.log(text); // Output: ["a", "b", "c"]
+        } else {
+          console.error("Failed to parse JSON");
+        }
+      }
       const doc = await prisma.typeSholarship.create({
         data: {
           text,
+          referid,
         },
       });
       await CacheAndInsertData(key, model, doc, select);
@@ -67,6 +79,15 @@ const TypeSholarshipController = {
   async SelectAll(req, res) {
     try {
       const doc = await CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, doc);
+    } catch (error) {
+      SendErrorCatch(res, `${EMessage.errorFetchingAll} typeSholarship`, error);
+    }
+  },
+  async SelectByReferId(req, res) {
+    try {
+      const id = req.params.id;
+      const doc = await FindTypeSholarshipByReferId(id);
       return SendSuccess(res, `${EMessage.fetchAllSuccess}`, doc);
     } catch (error) {
       SendErrorCatch(res, `${EMessage.errorFetchingAll} typeSholarship`, error);

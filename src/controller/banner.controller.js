@@ -7,6 +7,7 @@ import {
   findServicesById,
 } from "../services/find.js";
 import {
+  convertToJSON,
   SendCreate,
   SendError,
   SendErrorCatch,
@@ -39,7 +40,13 @@ const BannerController = {
         );
       }
       // const { services_id, title, detail } = req.body;
-      const { title, detail } = req.body;
+      let { title, detail, document, typescholarship } = req.body;
+      if (document && !Array.isArray(document)) {
+        document = convertToJSON(document);
+      }
+      if (typescholarship && !Array.isArray(typescholarship)) {
+        typescholarship = convertToJSON(typescholarship);
+      }
       // const serviceExists = await findServicesById(services_id);
       // if (!serviceExists) {
       //   return SendError(
@@ -70,6 +77,8 @@ const BannerController = {
           image: img_url,
           title,
           detail,
+          document,
+          typescholarship,
         },
       });
       CacheAndInsertData(key, model, banner, select);
@@ -101,6 +110,12 @@ const BannerController = {
       //     `${EMessage.notFound}:service with id ${id} `
       //   );
       // }
+      if (data.document && !Array.isArray(data.document)) {
+        data.document = convertToJSON(data.document);
+      }
+      if (data.typescholarship && !Array.isArray(data.typescholarship)) {
+        data.typescholarship = convertToJSON(data.typescholarship);
+      }
       const banner = await prisma.banner.update({
         where: {
           id,

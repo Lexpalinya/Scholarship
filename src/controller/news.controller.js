@@ -7,6 +7,7 @@ import {
   findServicesById,
 } from "../services/find.js";
 import {
+  convertToJSON,
   SendCreate,
   SendError,
   SendErrorCatch,
@@ -30,7 +31,13 @@ const NewsController = {
         );
       }
       // const { title, detail, services_id, start_time, end_time } = req.body;
-      const { title, detail } = req.body;
+      let{ title, detail, document, typescholarship } = req.body;
+      if (document && !Array.isArray(document)) {
+        document = convertToJSON(document);
+      }
+      if (typescholarship && !Array.isArray(typescholarship)) {
+        typescholarship = convertToJSON(typescholarship);
+      }
       const data = req.files;
       if (!data || !data.image || !data.file) {
         return SendError(res, 400, `${EMessage.pleaseInput}:  image, file `);
@@ -67,6 +74,8 @@ const NewsController = {
           // end_time,
           image: img_url,
           file_url: file_url_path,
+          document,
+          typescholarship,
         },
       });
       CacheAndInsertData(key, model, news, select);
@@ -94,6 +103,12 @@ const NewsController = {
       //     `${EMessage.notFound} services with id ${id}`
       //   );
       // }
+      if (data.document && !Array.isArray(data.document)) {
+        data.document = convertToJSON(data.document);
+      }
+      if (data.typescholarship && !Array.isArray(data.typescholarship)) {
+        data.typescholarship = convertToJSON(data.typescholarship);
+      }
       const news = await prisma.news.update({ where: { id }, data });
       await redis.del(key);
       CacheAndRetriveUpdateData(key, model, select);
