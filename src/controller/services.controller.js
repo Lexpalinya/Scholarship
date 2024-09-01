@@ -26,6 +26,8 @@ let select = {
   file_url: true,
   category_id: true,
   image: true,
+  document: true,
+  typescholarship: true,
   createdAt: true,
   updatedAt: true,
   category: {
