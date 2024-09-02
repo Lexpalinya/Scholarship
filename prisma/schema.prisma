@@ -147,6 +147,11 @@ model typeSholarship {
   updatedAt DateTime @updatedAt
 }
 
+model userview {
+  id        Int   @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
+
 enum UserRoles {
   admin
   superadmin

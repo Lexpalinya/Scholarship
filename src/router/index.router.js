@@ -11,6 +11,7 @@ import CompanyDataController from "../controller/companydata.controller.js";
 import CoverImageController from "../controller/coverImage.controller.js";
 import DocumentController from "../controller/document.controller.js";
 import TypeSholarshipController from "../controller/typeSholarship.controller.js";
+import UserViewController from "../controller/userview.controller.js";
 
 const route = express.Router();
 
@@ -166,4 +167,8 @@ route.delete(`${coverImage}/delete/:id`, auth, CoverImageController.Delete);
 //   auth,
 //   TypeSholarshipController.Delete
 // );
+
+const userview = `/userview`;
+route.post(`${userview}/insert`, UserViewController.Insert);
+route.get(`${userview}/selBymonth`, UserViewController.SelectByMonth);
 export default route;
