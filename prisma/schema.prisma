@@ -148,7 +148,13 @@ model typeSholarship {
 }
 
 model userview {
-  id        Int   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
+
+model totalDownloads {
+  id        Int      @id @default(autoincrement())
+  type      String
   createdAt DateTime @default(now())
 }
 

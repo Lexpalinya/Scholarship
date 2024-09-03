@@ -12,6 +12,7 @@ import CoverImageController from "../controller/coverImage.controller.js";
 import DocumentController from "../controller/document.controller.js";
 import TypeSholarshipController from "../controller/typeSholarship.controller.js";
 import UserViewController from "../controller/userview.controller.js";
+import TotalDownloadsController from "../controller/totalDownload.controller.js";
 
 const route = express.Router();
 
@@ -171,4 +172,11 @@ route.delete(`${coverImage}/delete/:id`, auth, CoverImageController.Delete);
 const userview = `/userview`;
 route.post(`${userview}/insert`, UserViewController.Insert);
 route.get(`${userview}/selBymonth`, UserViewController.SelectByMonth);
+
+const totalDownloads = `/totalDownloads`;
+route.post(`${totalDownloads}/insert`, TotalDownloadsController.Insert);
+route.get(
+  `${totalDownloads}/selBymonth`,
+  TotalDownloadsController.SelectByMonth
+);
 export default route;
