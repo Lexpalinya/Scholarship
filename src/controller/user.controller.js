@@ -111,14 +111,14 @@ const UserController = {
           return SendError(
             res,
             400,
-            `${EMessage.userAlreadyExists} with username :${username}`
+            `${EMessage.userAlreadyExists} with username :${data.username}`
           );
         }
         if (data.email && existingUser.email === data.email) {
           return SendError(
             res,
             400,
-            `${EMessage.userAlreadyExists} with email :${email}`
+            `${EMessage.userAlreadyExists} with email :${data.email}`
           );
         }
       }
