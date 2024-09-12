@@ -1,5 +1,6 @@
 import redis from "../DB/redis.js";
 import { EMessage } from "../services/enum.js";
+import { S3Upload } from "../services/s3UploadImage.js";
 import {
   SendCreate,
   SendError,
@@ -23,15 +24,17 @@ const CompanyDataController = {
           `${EMessage.pleaseInput}:${validate.join(", ")}`
         );
       }
+      const { title, description } = req.body;
       const data = req.files;
       if (!data || !data.icon) {
         return SendError(res, 400, `${EMessage.pleaseInput}:icon is required`);
       }
-      const icon = await UploadImage(data.icon.data);
-      if (!icon) {
-        throw new Error("Upload Image failed");
-      }
-      const { title, description } = req.body;
+      const icon = await S3Upload(data.icon).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       const company = await prisma.companyData.create({
         data: { title, description, icon },
       });
@@ -109,10 +112,12 @@ const CompanyDataController = {
       if (!data || !data.icon) {
         return SendError(res, 400, `${EMessage.pleaseInput}:icon is required`);
       }
-      const icon = await UploadImage(data.icon.data, oldIcon);
-      if (!icon) {
-        throw new Error("Upload Image failed");
-      }
+      const icon = await S3Upload(data.icon, oldIcon).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       const companyDataExists = await prisma.companyData.findUnique({
         where: { id },
       });

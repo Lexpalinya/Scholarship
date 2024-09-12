@@ -6,14 +6,16 @@ import {
   findCategoryById,
   findServicesById,
 } from "../services/find.js";
+import { S3Upload, S3UploadFile } from "../services/s3UploadImage.js";
 import {
+  CheckUniqueElement,
   convertToJSON,
   SendCreate,
   SendError,
   SendErrorCatch,
   SendSuccess,
 } from "../services/service.js";
-import { UploadFile, UploadImage } from "../services/uploadImage.js";
+import { UploadFile } from "../services/uploadImage.js";
 import { DataExist, ValidateServices } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "services-scholarship";
@@ -76,19 +78,37 @@ const ServicesController = {
         );
       }
 
+      let uploadPromises = [];
+      if (Array.isArray(data.file) && data.file.length > 0) {
+        // Handle multiple file
+        uploadPromises = data.file.map((file) =>
+          S3UploadFile(file).then((url) => {
+            if (!url) {
+              throw new Error("Upload Image failed");
+            }
+            return url;
+          })
+        );
+      } else {
+        // Handle single image
+        uploadPromises = [
+          S3UploadFile(data.file).then((url) => {
+            if (!url) {
+              throw new Error("Upload Image failed");
+            }
+            return url;
+          }),
+        ];
+      }
+
       const [img_url, file_url] = await Promise.all([
-        UploadImage(data.image.data).then((url) => {
+        S3Upload(data.image).then((url) => {
           if (!url) {
             throw new Error("Upload Image failed");
           }
           return url;
         }),
-        UploadFile(data.file).then((url) => {
-          if (!url) {
-            throw new Error("Upload file failed");
-          }
-          return url;
-        }),
+        Promise.all(uploadPromises),
       ]);
       const services = await prisma.services.create({
         data: {
@@ -173,14 +193,12 @@ const ServicesController = {
           `${EMessage.notFound} service with id ${id}`
         );
       }
-      const img_url = await UploadImage(data.image.data, oldImage).then(
-        (url) => {
-          if (!url) {
-            throw new Error("Upload Image failed");
-          }
-          return url;
+      const img_url = await S3Upload(data.image, oldImage).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
         }
-      );
+        return url;
+      });
 
       const services = await prisma.services.update({
         where: { id },
@@ -202,8 +220,8 @@ const ServicesController = {
   async UpdateFile(req, res) {
     try {
       const id = req.params.id;
-      const { oldFile } = req.body;
-
+      let { oldFile } = req.body;
+      const data = req.files;
       if (!oldFile) {
         return SendError(
           res,
@@ -211,10 +229,20 @@ const ServicesController = {
           `${EMessage.pleaseInput}: oldFile is required`
         );
       }
+      oldFile = oldFile.split(",");
+      if (oldFile.length === 0)
+        return SendError(res, 400, `${EMessage.pleaseInput}: oldFile`);
 
-      if (!req.files || !req.files.file) {
+      if (!data || !data.file) {
         return SendError(res, 400, `${EMessage.pleaseInput}: file`);
       }
+      const dataFileToList = !data.file.length ? [data.file] : data.file;
+      if (dataFileToList.length !== oldFile.length)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: The number of provided file files does not match the existing records. Please ensure you have uploaded the correct number of images.`
+        );
 
       const serviceExists = await findServicesById(id);
       if (!serviceExists) {
@@ -224,25 +252,23 @@ const ServicesController = {
           `${EMessage.notFound} service with id ${id}`
         );
       }
+      const oldFileList = await serviceExists.file_url;
+      let file_url_List = CheckUniqueElement(oldFileList, oldFile);
+      const promise = dataFileToList.map((file, i) =>
+        S3UploadFile(file, oldFile[i]).then((url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
+        })
+      );
 
-      let file_url;
-      try {
-        file_url = await UploadFile(req.files.file, oldFile);
-        if (!file_url) {
-          throw new Error("Upload file failed: No URL returned");
-        }
-      } catch (uploadError) {
-        console.error("File upload error:", uploadError);
-        return SendError(
-          res,
-          500,
-          `File upload failed: ${uploadError.message}`
-        );
-      }
+      let file_url = await Promise.all(promise);
+      file_url_List = file_url_List.concat(file_url);
 
       const services = await prisma.services.update({
         where: { id },
-        data: { file_url },
+        data: { file_url: file_url_List },
       });
 
       await redis.del(key, key + serviceExists.category_id);

@@ -28,7 +28,7 @@ model Banner {
   title           String   @default("")
   detail          String   @default("")
   isPublished     Boolean  @default(true)
-  url_path        String
+  url_path        String[]
   document        String[]
   typescholarship String[]
   // services_id String   @db.VarChar(36)
@@ -65,7 +65,7 @@ model Services {
   title           String
   isActive        Boolean  @default(true)
   description     String
-  file_url        String
+  file_url        String[]
   document        String[]
   typescholarship String[]
   category_id     String   @db.VarChar(36)
@@ -85,8 +85,8 @@ model News {
   // services_id String   @db.VarChar(36)
   image           String
   file_url        String   @default("")
-  document        String[]
-  typescholarship String[]
+  // document        String[]
+  // typescholarship String[]
   // start_time  DateTime
   // end_time    DateTime
   // services    Services @relation(fields: [services_id], references: [id])
