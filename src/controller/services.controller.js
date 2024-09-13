@@ -15,7 +15,6 @@ import {
   SendErrorCatch,
   SendSuccess,
 } from "../services/service.js";
-import { UploadFile } from "../services/uploadImage.js";
 import { DataExist, ValidateServices } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "services-scholarship";
