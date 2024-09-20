@@ -83,15 +83,8 @@ model News {
   title           String
   detail          String
   // services_id String   @db.VarChar(36)
-<<<<<<< HEAD
   image     String
-  // file_url        String   @default("")
-=======
-  image           String
-  file_url        String   @default("")
->>>>>>> 794b02ddc6c83d83577060f2cbc051cfe3144c64
-  // document        String[]
-  // typescholarship String[]
+  // file_url  String   @default("")
   // start_time  DateTime
   // end_time    DateTime
   // services    Services @relation(fields: [services_id], references: [id])

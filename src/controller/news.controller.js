@@ -51,24 +51,21 @@ const NewsController = {
       //     `${EMessage.notFound}: service with id ${services_id}`
       //   );
       // }
-      // console.log("data.image.name :>> ", data.image);
-      // const imgurl = await S3Upload(data.image, oldimg);
-      const [img_url] = await Promise.all([
-        S3Upload(data.image).then((url) => {
+      const [img_url, file_url_path] = await Promise.all([
+        UploadImage(data.image.data).then((url) => {
           if (!url) {
             throw new Error("Upload Image failed");
           }
           return url;
         }),
-        // S3UploadFile(data.file).then((url) => {
+        // UploadFile(data.file).then((url) => {
         //   if (!url) {
-        //     throw new Error("Upload file failed");
+        //     throw new Error("Upload Image failed");
         //   }
         //   return url;
         // }),
       ]);
-      console.log("img_url :>> ", img_url);
-      // console.log("file_url_path :>> ", file_url_path);
+
       const news = await prisma.news.create({
         data: {
           title,
@@ -78,8 +75,6 @@ const NewsController = {
           // end_time,
           image: img_url,
           // file_url: file_url_path,
-          // document,
-          // typescholarship,
         },
       });
       CacheAndInsertData(key, model, news, select);
@@ -180,7 +175,7 @@ const NewsController = {
   //     if (!newsExists) {
   //       return SendError(res, 404, `${EMessage.notFound}:news with id ${id} `);
   //     }
-  //     const file_url = await S3UploadFile(data.file, oldFile).then((url) => {
+  //     const file_url = await UploadFile(data.file, oldFile).then((url) => {
   //       if (!url) {
   //         throw new Error("Upload file failed");
   //       }
