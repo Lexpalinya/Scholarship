@@ -1,5 +1,6 @@
 import redis from "../DB/redis.js";
 import { EMessage } from "../services/enum.js";
+import { S3Upload } from "../services/s3UploadImage.js";
 import {
   SendCreate,
   SendError,
@@ -23,19 +24,21 @@ const CompanyDataController = {
           `${EMessage.pleaseInput}:${validate.join(", ")}`
         );
       }
+      const { title, description } = req.body;
       const data = req.files;
       if (!data || !data.icon) {
         return SendError(res, 400, `${EMessage.pleaseInput}:icon is required`);
       }
-      const icon = await UploadImage(data.icon.data);
-      if (!icon) {
-        throw new Error("Upload Image failed");
-      }
-      const { title, description } = req.body;
+      const icon = await S3Upload(data.icon).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       const company = await prisma.companyData.create({
         data: { title, description, icon },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([company]), "EX", 3600);
 
       return SendCreate(res, `${EMessage.insertSuccess}`, company);
@@ -83,7 +86,7 @@ const CompanyDataController = {
       const company = await prisma.companyData.delete({
         where: { id },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([company]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {
@@ -109,10 +112,12 @@ const CompanyDataController = {
       if (!data || !data.icon) {
         return SendError(res, 400, `${EMessage.pleaseInput}:icon is required`);
       }
-      const icon = await UploadImage(data.icon.data, oldIcon);
-      if (!icon) {
-        throw new Error("Upload Image failed");
-      }
+      const icon = await S3Upload(data.icon, oldIcon).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       const companyDataExists = await prisma.companyData.findUnique({
         where: { id },
       });
@@ -124,7 +129,7 @@ const CompanyDataController = {
           icon,
         },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([company]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, company);
     } catch (error) {

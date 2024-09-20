@@ -23,16 +23,18 @@ model About {
 }
 
 model Banner {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  isActive    Boolean  @default(true)
-  title       String   @default("")
-  detail      String   @default("")
-  isPublished Boolean  @default(true)
-  url_path    String
+  id              String   @id @default(uuid()) @db.VarChar(36)
+  isActive        Boolean  @default(true)
+  title           String   @default("")
+  detail          String   @default("")
+  isPublished     Boolean  @default(true)
+  url_path        String[]
+  document        String[]
+  typescholarship String[]
   // services_id String   @db.VarChar(36)
-  image       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  image           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   // services    Services @relation(fields: [services_id], references: [id])
 }
 
@@ -59,16 +61,18 @@ model Category {
 }
 
 model Services {
-  id          String   @id @default(uuid()) @db.VarChar(36)
-  title       String
-  isActive    Boolean  @default(true)
-  description String
-  file_url    String
-  category_id String   @db.VarChar(36)
-  image       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  category    Category @relation(fields: [category_id], references: [id])
+  id              String   @id @default(uuid()) @db.VarChar(36)
+  title           String
+  isActive        Boolean  @default(true)
+  description     String
+  file_url        String[]
+  document        String[]
+  typescholarship String[]
+  category_id     String   @db.VarChar(36)
+  image           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  category        Category @relation(fields: [category_id], references: [id])
   // banner      Banner[]
   // news        News[]
 }
@@ -80,7 +84,9 @@ model News {
   detail    String
   // services_id String   @db.VarChar(36)
   image     String
-  file_url  String   @default("")
+  // file_url        String   @default("")
+  // document        String[]
+  // typescholarship String[]
   // start_time  DateTime
   // end_time    DateTime
   // services    Services @relation(fields: [services_id], references: [id])
@@ -121,6 +127,35 @@ model coverImage {
   image     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model document {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean  @default(true)
+  referid   String
+  text      String[] @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model typeSholarship {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  isActive  Boolean  @default(true)
+  referid   String
+  text      String[] @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model userview {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
+
+model totalDownloads {
+  id        Int      @id @default(autoincrement())
+  type      String
+  createdAt DateTime @default(now())
 }
 
 enum UserRoles {

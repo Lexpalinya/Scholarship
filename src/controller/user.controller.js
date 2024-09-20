@@ -26,6 +26,7 @@ import {
 } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 import redis from "../DB/redis.js";
+import { S3Upload } from "../services/s3UploadImage.js";
 let key = "users-scholarship";
 let model = "user";
 let select;
@@ -67,9 +68,9 @@ const UserController = {
         throw new Error(err);
       });
 
-      const img_url = await UploadImage(data.image.data).then((url) => {
+      const img_url = await S3Upload(data.image).then((url) => {
         if (!url) {
-          throw new Error("Upload image failed");
+          throw new Error("Upload Image failed");
         }
         return url;
       });
@@ -111,14 +112,14 @@ const UserController = {
           return SendError(
             res,
             400,
-            `${EMessage.userAlreadyExists} with username :${username}`
+            `${EMessage.userAlreadyExists} with username :${data.username}`
           );
         }
         if (data.email && existingUser.email === data.email) {
           return SendError(
             res,
             400,
-            `${EMessage.userAlreadyExists} with email :${email}`
+            `${EMessage.userAlreadyExists} with email :${data.email}`
           );
         }
       }
@@ -154,12 +155,12 @@ const UserController = {
       if (!userExists) {
         return SendError(res, 404, `${EMessage.notFound} user with id :${id}`);
       }
-      const img_url = await UploadImage(data.image.data, oldProfile).then(
-        (url) => {
-          if (!url) throw new Error("upload image failed");
-          return url;
+      const img_url = await S3Upload(data.image, oldProfile).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
         }
-      );
+        return url;
+      });
       const user = await prisma.user.update({
         where: { id },
         data: { profile: img_url },

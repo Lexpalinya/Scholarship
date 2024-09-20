@@ -6,7 +6,10 @@ import {
   findBannerById,
   findServicesById,
 } from "../services/find.js";
+import { S3Upload, S3UploadFile } from "../services/s3UploadImage.js";
 import {
+  CheckUniqueElement,
+  convertToJSON,
   SendCreate,
   SendError,
   SendErrorCatch,
@@ -38,8 +41,15 @@ const BannerController = {
           `${EMessage.pleaseInput}:  image, url_path `
         );
       }
+
       // const { services_id, title, detail } = req.body;
-      const { title, detail } = req.body;
+      let { title, detail, document, typescholarship } = req.body;
+      if (document && !Array.isArray(document)) {
+        document = convertToJSON(document);
+      }
+      if (typescholarship && !Array.isArray(typescholarship)) {
+        typescholarship = convertToJSON(typescholarship);
+      }
       // const serviceExists = await findServicesById(services_id);
       // if (!serviceExists) {
       //   return SendError(
@@ -48,19 +58,38 @@ const BannerController = {
       //     `${EMessage.notFound}: service with id ${services_id}`
       //   );
       // }
+      let uploadPromises = [];
+
+      if (Array.isArray(data.url_path) && data.url_path.length > 0) {
+        // Handle multiple url_path
+        uploadPromises = data.url_path.map((file) =>
+          S3UploadFile(file).then((url) => {
+            if (!url) {
+              throw new Error("Upload Image failed");
+            }
+            return url;
+          })
+        );
+      } else {
+        // Handle single image
+        uploadPromises = [
+          S3UploadFile(data.url_path).then((url) => {
+            if (!url) {
+              throw new Error("Upload Image failed");
+            }
+            return url;
+          }),
+        ];
+      }
+
       const [img_url, file_url_path] = await Promise.all([
-        UploadImage(data.image.data).then((url) => {
+        S3Upload(data.image).then((url) => {
           if (!url) {
             throw new Error("Upload Image failed");
           }
           return url;
         }),
-        UploadFile(data.url_path).then((url) => {
-          if (!url) {
-            throw new Error("Upload Image failed");
-          }
-          return url;
-        }),
+        Promise.all(uploadPromises),
       ]);
 
       const banner = await prisma.banner.create({
@@ -70,6 +99,8 @@ const BannerController = {
           image: img_url,
           title,
           detail,
+          document,
+          typescholarship,
         },
       });
       CacheAndInsertData(key, model, banner, select);
@@ -101,6 +132,12 @@ const BannerController = {
       //     `${EMessage.notFound}:service with id ${id} `
       //   );
       // }
+      if (data.document && !Array.isArray(data.document)) {
+        data.document = convertToJSON(data.document);
+      }
+      if (data.typescholarship && !Array.isArray(data.typescholarship)) {
+        data.typescholarship = convertToJSON(data.typescholarship);
+      }
       const banner = await prisma.banner.update({
         where: {
           id,
@@ -136,14 +173,12 @@ const BannerController = {
           `${EMessage.notFound}:banner with id ${id} `
         );
       }
-      const img_url = await UploadImage(data.image.data, oldImage).then(
-        (url) => {
-          if (!url) {
-            throw new Error("Upload Image failed");
-          }
-          return url;
+      const img_url = await S3Upload(data.image, oldImage).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
         }
-      );
+        return url;
+      });
       const banner = await prisma.banner.update({
         where: { id },
         data: {
@@ -160,7 +195,7 @@ const BannerController = {
   async UpdateFile(req, res) {
     try {
       const id = req.params.id;
-      const { oldFile } = req.body;
+      let { oldFile } = req.body;
       const data = req.files;
       if (!data || !data.file) {
         return SendError(res, 400, `${EMessage.pleaseInput}: file `);
@@ -171,6 +206,19 @@ const BannerController = {
           400,
           `${EMessage.pleaseInput}: oldFile is required`
         );
+
+      oldFile = oldFile.split(",");
+
+      if (oldFile.length === 0)
+        return SendError(res, 400, `${EMessage.pleaseInput}: oldFile`);
+      const dataFileToList = !data.file.length ? [data.file] : data.file;
+      if (dataFileToList.length !== oldFile.length)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: The number of provided file files does not match the existing records. Please ensure you have uploaded the correct number of images.`
+        );
+
       const bannerExists = await findBannerById(id);
       if (!bannerExists) {
         return SendError(
@@ -179,16 +227,23 @@ const BannerController = {
           `${EMessage.notFound}:banner with id ${id} `
         );
       }
-      const file_url = await UploadFile(data.file, oldFile).then((url) => {
-        if (!url) {
-          throw new Error("Upload file failed");
-        }
-        return url;
-      });
+      const oldFileList = bannerExists.url_path;
+      let file_url_List = CheckUniqueElement(oldFileList, oldFile);
+      const promise = dataFileToList.map((file, i) =>
+        S3UploadFile(file, oldFile[i]).then((url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
+        })
+      );
+
+      let file_url = await Promise.all(promise);
+      file_url_List = file_url_List.concat(file_url);
       const banner = await prisma.banner.update({
         where: { id },
         data: {
-          url_path: file_url,
+          url_path: file_url_List,
         },
       });
       await redis.del(key, key + bannerExists.services_id);

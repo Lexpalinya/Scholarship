@@ -80,6 +80,8 @@ redis.on("error", (err) => {
 
 await redis.flushdb();
 
+
+
 // const user = await redis.get("users");
 // console.log('user :>> ', user);
 // Start Server

@@ -159,3 +159,16 @@ export const VerifyRefreshToken = (data) => {
     });
   });
 };
+
+export const convertToJSON = (validString) => {
+  try {
+    // Replace single quotes with double quotes
+    const jsonString = validString.replace(/'/g, '"');
+
+    // Parse the JSON string
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+    return null; // Or handle the error as needed
+  }
+};

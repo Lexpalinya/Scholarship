@@ -5,6 +5,7 @@ import {
   CacheAndRetriveUpdateData,
   findAboutByid,
 } from "../services/find.js";
+import { S3Upload } from "../services/s3UploadImage.js";
 import {
   CheckUniqueElement,
   SendCreate,
@@ -12,7 +13,6 @@ import {
   SendErrorCatch,
   SendSuccess,
 } from "../services/service.js";
-import { UploadImage } from "../services/uploadImage.js";
 import { DataExist, ValidateAbout } from "../services/validate.js";
 import prisma from "../util/prismaClient.js";
 let key = "abouts-scholarship";
@@ -39,7 +39,7 @@ const AboutConttroller = {
       if (Array.isArray(data.images) && data.images.length > 0) {
         // Handle multiple images
         uploadPromises = data.images.map((image) =>
-          UploadImage(image.data).then((url) => {
+          S3Upload(image).then((url) => {
             if (!url) {
               throw new Error("Upload Image failed");
             }
@@ -49,7 +49,7 @@ const AboutConttroller = {
       } else {
         // Handle single image
         uploadPromises = [
-          UploadImage(data.images.data).then((url) => {
+          S3Upload(data.images).then((url) => {
             if (!url) {
               throw new Error("Upload Image failed");
             }
@@ -116,7 +116,7 @@ const AboutConttroller = {
       const OldImageList = aboutExists.images;
       let images_url_List = CheckUniqueElement(OldImageList, oldImages);
       const ImagesPromises = dataImagesToList.map((img, i) =>
-        UploadImage(img.data, oldImages[i]).then((url) => {
+        S3Upload(img, oldImages[i]).then((url) => {
           if (!url) {
             throw new Error("Upload Image failed");
           }

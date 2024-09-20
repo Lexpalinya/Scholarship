@@ -1,5 +1,6 @@
 import redis from "../DB/redis.js";
 import { EMessage } from "../services/enum.js";
+import { S3Upload } from "../services/s3UploadImage.js";
 import {
   SendCreate,
   SendError,
@@ -16,14 +17,16 @@ const CoverImageController = {
       if (!data || !data.image) {
         return SendError(res, 400, `${EMessage.pleaseInput}:image is required`);
       }
-      const image = await UploadImage(data.image.data);
-      if (!image) {
-        throw new Error("Upload Image failed");
-      }
+      const image = await S3Upload(data.image).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       const coverImage = await prisma.coverImage.create({
         data: { image },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([coverImage]), "EX", 3600);
       return SendCreate(res, `${EMessage.insertSuccess}`, coverImage);
     } catch (error) {
@@ -46,7 +49,7 @@ const CoverImageController = {
       const coverImage = await prisma.coverImage.delete({
         where: { id },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
 
       return SendSuccess(res, `${EMessage.deleteSuccess}`, coverImage);
     } catch (error) {
@@ -72,10 +75,12 @@ const CoverImageController = {
       if (!data || !data.image) {
         return SendError(res, 400, `${EMessage.pleaseInput}:image is required`);
       }
-      const image = await UploadImage(data.image.data, oldImage);
-      if (!image) {
-        throw new Error("Upload Image failed");
-      }
+      const image = await S3Upload(data.image, oldImage).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       const coverImageExists = await prisma.coverImage.findUnique({
         where: { id },
       });
@@ -88,7 +93,7 @@ const CoverImageController = {
           image,
         },
       });
-      await redis.del(key + "*");
+      await redis.del(key);
       await redis.set(key, JSON.stringify([coverImage]), "EX", 3600);
       return SendSuccess(res, `${EMessage.updateSuccess}`, coverImage);
     } catch (error) {
