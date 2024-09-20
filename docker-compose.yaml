@@ -5,17 +5,17 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://avnadmin:AVNS_Ln3_Vked6PepDgbcrJe@pg-23d27e04-ai3n17a75-0a2a.e.aivencloud.com:11465/defaultdb?schema=public
-      - EAPI=/api/v1
-      - REDIS_HOST=localhost
-      - REDIS_PORT=6379
-      - SECRET_KEY=scholarship
-      - REFRESH_TOKEN=scholarship__adffdslakdf
-      - JWT_TIMEOUT=50h
-      - JWT_REFRESH_TIMEOUT=72h
-      - AWS_ACCESS_KEY_ID=AKIA5G2VGPJNXWJZ2KNL
-      - AWS_SECRET_ACCESS_KEY=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
-      - AWS_REGION=ap-southeast-1
+      - DATABASE_URL=${DATABASE_URL}
+      - EAPI=${EAPI}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - REFRESH_TOKEN=${REFRESH_TOKEN}
+      - JWT_TIMEOUT=${JWT_TIMEOUT}
+      - JWT_REFRESH_TIMEOUT=${JWT_REFRESH_TIMEOUT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
     depends_on:
       my-redis-container:
         condition: service_healthy
