@@ -6,7 +6,4 @@ const redis = new Redis({
   port: REDIS_PORT,
 });
 
-
-
-
 export default redis;
