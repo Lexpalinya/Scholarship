@@ -41,8 +41,12 @@ const NewsController = {
       //   typescholarship = convertToJSON(typescholarship);
       // }
       const data = req.files;
-      if (!data || !data.image) {
-        return SendError(res, 400, `${EMessage.pleaseInput}:  image`);
+      if (!data || !data.image || !data.cover_image) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: ${!data.image ? "image" : "cover_image"}`
+        );
       }
       // const serviceExists = await findServicesById(services_id);
       // if (!serviceExists) {
@@ -75,7 +79,12 @@ const NewsController = {
           }),
         ];
       }
-
+      const cover_image = await S3Upload(data.cover_image).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      });
       // Wait for all image uploads to complete
       const images_url_List = await Promise.all(uploadPromises);
       // const [img_url, file_url_path] = await Promise.all([
@@ -100,6 +109,7 @@ const NewsController = {
           // services_id,
           // start_time,
           // end_time,
+          cover_image,
           image: images_url_List,
           // file_url: file_url_path,
         },
@@ -203,43 +213,45 @@ const NewsController = {
       return SendErrorCatch(res, `${EMessage.updateFailed}news images`, error);
     }
   },
-  // async UpdateFile(req, res) {
-  //   try {
-  //     const id = req.params.id;
-  //     const { oldFile } = req.body;
-  //     const data = req.files;
-  //     if (!data || !data.file) {
-  //       return SendError(res, 400, `${EMessage.pleaseInput}: file `);
-  //     }
-  //     if (!oldFile)
-  //       return SendError(
-  //         res,
-  //         400,
-  //         `${EMessage.pleaseInput}: oldFile is required`
-  //       );
-  //     const newsExists = await findNewsById(id);
-  //     if (!newsExists) {
-  //       return SendError(res, 404, `${EMessage.notFound}:news with id ${id} `);
-  //     }
-  //     const file_url = await UploadFile(data.file, oldFile).then((url) => {
-  //       if (!url) {
-  //         throw new Error("Upload file failed");
-  //       }
-  //       return url;
-  //     });
-  //     const news = await prisma.news.update({
-  //       where: { id },
-  //       data: {
-  //         file_url: file_url,
-  //       },
-  //     });
-  //     await redis.del(key);
-  //     CacheAndRetriveUpdateData(key, model, select);
-  //     return SendSuccess(res, `${EMessage.updateSuccess}`, news);
-  //   } catch (error) {
-  //     return SendErrorCatch(res, `${EMessage.updateFailed}`, error);
-  //   }
-  // },
+  async UpdateCover_image(req, res) {
+    try {
+      const id = req.params.id;
+      const { oldCover_image } = req.body;
+      const data = req.files;
+      if (!data || !data.cover_image) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: cover_image `);
+      }
+      if (!oldCover_image)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: oldCover_image is required`
+        );
+      const newsExists = await findNewsById(id);
+      if (!newsExists) {
+        return SendError(res, 404, `${EMessage.notFound}:news with id ${id} `);
+      }
+      const cover_image = await S3Upload(data.cover_image, oldCover_image).then(
+        (url) => {
+          if (!url) {
+            throw new Error("Upload image failed");
+          }
+          return url;
+        }
+      );
+      const news = await prisma.news.update({
+        where: { id },
+        data: {
+          cover_image,
+        },
+      });
+      await redis.del(key);
+      CacheAndRetriveUpdateData(key, model, select);
+      return SendSuccess(res, `${EMessage.updateSuccess}`, news);
+    } catch (error) {
+      return SendErrorCatch(res, `${EMessage.updateFailed}`, error);
+    }
+  },
 
   async Delete(req, res) {
     try {
