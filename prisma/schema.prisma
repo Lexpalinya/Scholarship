@@ -83,7 +83,7 @@ model News {
   title           String
   detail          String
   // services_id String   @db.VarChar(36)
-  image     String
+  image     String[]
   // file_url  String   @default("")
   // start_time  DateTime
   // end_time    DateTime

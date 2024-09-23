@@ -3,15 +3,15 @@ import sharp from "sharp";
 export const S3Upload = ({ name, data }, oldFile) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (oldFile) {
-        const deleteParams = {
-          Bucket: "saiyfonbroker",
-          Key: "images/" + oldFile,
-        };
-        console.log("Delete params :>> ", deleteParams);
+      // if (oldFile) {
+      //   const deleteParams = {
+      //     Bucket: "saiyfonbroker",
+      //     Key: "images/" + oldFile,
+      //   };
+      //   console.log("Delete params :>> ", deleteParams);
 
-        await s3.deleteObject(deleteParams).promise();
-      }
+      //   await s3.deleteObject(deleteParams).promise();
+      // }
 
       // Convert image to WebP
       const webpBuffer = await sharp(data).toFormat("webp").toBuffer();
@@ -37,15 +37,15 @@ export const S3Upload = ({ name, data }, oldFile) => {
 export const S3UploadFile = ({ name, data }, oldFile) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (oldFile) {
-        const deleteParams = {
-          Bucket: "saiyfonbroker",
-          Key: "pdfs/" + oldFile,
-        };
+      // if (oldFile) {
+      //   const deleteParams = {
+      //     Bucket: "saiyfonbroker",
+      //     Key: "pdfs/" + oldFile,
+      //   };
 
-        await s3.deleteObject(deleteParams).promise();
-        // console.log("a :>> ", a);
-      }
+      //   await s3.deleteObject(deleteParams).promise();
+      //   // console.log("a :>> ", a);
+      // }
 
       const timeid = Date.now().toString().slice(-10);
       const filenamekey = timeid + "-" + name;
