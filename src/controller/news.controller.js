@@ -8,6 +8,7 @@ import {
 } from "../services/find.js";
 import { S3Upload, S3UploadFile } from "../services/s3UploadImage.js";
 import {
+  CheckUniqueElement,
   SendCreate,
   SendError,
   SendErrorCatch,
@@ -51,20 +52,46 @@ const NewsController = {
       //     `${EMessage.notFound}: service with id ${services_id}`
       //   );
       // }
-      const [img_url, file_url_path] = await Promise.all([
-        UploadImage(data.image.data).then((url) => {
-          if (!url) {
-            throw new Error("Upload Image failed");
-          }
-          return url;
-        }),
-        // UploadFile(data.file).then((url) => {
-        //   if (!url) {
-        //     throw new Error("Upload Image failed");
-        //   }
-        //   return url;
-        // }),
-      ]);
+      let uploadPromises = [];
+
+      if (Array.isArray(data.image) && data.image.length > 0) {
+        // Handle multiple images
+        uploadPromises = data.image.map((image) =>
+          S3Upload(image).then((url) => {
+            if (!url) {
+              throw new Error("Upload Image failed");
+            }
+            return url;
+          })
+        );
+      } else {
+        // Handle single image
+        uploadPromises = [
+          S3Upload(data.image).then((url) => {
+            if (!url) {
+              throw new Error("Upload Image failed");
+            }
+            return url;
+          }),
+        ];
+      }
+
+      // Wait for all image uploads to complete
+      const images_url_List = await Promise.all(uploadPromises);
+      // const [img_url, file_url_path] = await Promise.all([
+      //   UploadImage(data.image.data).then((url) => {
+      //     if (!url) {
+      //       throw new Error("Upload Image failed");
+      //     }
+      //     return url;
+      //   }),
+      //   // UploadFile(data.file).then((url) => {
+      //   //   if (!url) {
+      //   //     throw new Error("Upload Image failed");
+      //   //   }
+      //   //   return url;
+      //   // }),
+      // ]);
 
       const news = await prisma.news.create({
         data: {
@@ -73,7 +100,7 @@ const NewsController = {
           // services_id,
           // start_time,
           // end_time,
-          image: img_url,
+          image: images_url_List,
           // file_url: file_url_path,
         },
       });
@@ -120,10 +147,22 @@ const NewsController = {
   async UpdateImage(req, res) {
     try {
       const id = req.params.id;
-      const { oldImage } = req.body;
+      let { oldImage } = req.body;
       const data = req.files;
       if (!data || !data.image) {
         return SendError(res, 400, `${EMessage.pleaseInput}: image `);
+      }
+      oldImage = oldImage.split(",");
+      if (oldImage.length === 0) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: oldImage`);
+      }
+      const dataImageToList = !data.image.length ? [data.image] : data.image;
+      if (dataImageToList.length !== oldImage.length) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: The number of provided docImage files does not match the existing records. Please ensure you have uploaded the correct number of image.`
+        );
       }
 
       if (!oldImage)
@@ -132,22 +171,29 @@ const NewsController = {
           400,
           `${EMessage.pleaseInput}: oldImage is required`
         );
+
       const newsExists = await findNewsById(id);
       if (!newsExists) {
         return SendError(res, 404, `${EMessage.notFound}news with id ${id}`);
       }
 
-      const img_url = await S3Upload(data.image, oldImage).then((url) => {
-        if (!url) {
-          throw new Error("Upload Image failed");
-        }
-        return url;
-      });
-      console.log("img_url :>> ", img_url);
+      const OldImageList = newsExists.image;
+      let images_url_List = CheckUniqueElement(OldImageList, oldImage);
+      const ImagesPromises = dataImageToList.map((img, i) =>
+        S3Upload(img, oldImage[i]).then((url) => {
+          if (!url) {
+            throw new Error("Upload Image failed");
+          }
+          return url;
+        })
+      );
+      const images_url_list = await Promise.all(ImagesPromises);
+      images_url_List = images_url_List.concat(images_url_list);
+
       const news = await prisma.news.update({
         where: { id },
         data: {
-          image: img_url,
+          image: images_url_List,
         },
       });
       await redis.del(key);
