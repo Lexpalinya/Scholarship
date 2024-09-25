@@ -144,7 +144,7 @@ export const VerifyRefreshToken = (data) => {
           return reject("Error: User not found");
         }
 
-        const encryptedId = await Endcrypt(user.id, SECRET_KEY);
+        const encryptedId = await Encrypt(user.id, SECRET_KEY);
 
         const tokenData = {
           id: encryptedId,
