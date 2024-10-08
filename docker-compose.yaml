@@ -1,12 +1,23 @@
 version: "3.9"
 services:
   app-node-service:
-    platform: linux/amd64 # Add this line to set the correct platform
+    platform: linux/amd64 # Specify platform for compatibility
     build: .
+    image: lexpalinya/app-node-service:latest # Add the image name for pushing
     ports:
       - "8000:8000"
     environment:
-      - .env
+      - DATABASE_URL=postgresql://postgres:btp_postgres@database-postgres-btp.cn40sm0i4ttx.ap-southeast-1.rds.amazonaws.com:5432/postgres?schema=public
+      - EAPI=/api/v1
+      - SERVER_PORT=8000
+      - SECRET_KEY=scholarship
+      - REFRESH_TOKEN=scholarship__adffdslakdf
+      - NODE_ENV=development
+      - JWT_TIMEOUT=50h
+      - JWT_REFRESH_TIMEOUT=72h
+      - AWS_ACCESS_KEY_ID=AKIA5G2VGPJNXWJZ2KNL
+      - AWS_SECRET_ACCESS_KEY=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
+      - AWS_REGION=ap-southeast-1
       - REDIS_HOST=my-redis-container
       - REDIS_PORT=6379
     depends_on:

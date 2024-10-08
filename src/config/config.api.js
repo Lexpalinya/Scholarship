@@ -2,6 +2,7 @@ import { configDotenv } from "dotenv";
 configDotenv();
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
 const KLimit = 20;
 
@@ -35,6 +36,7 @@ export {
   CLOUDINARY_API_SECRET,
   REDIS_HOST,
   REDIS_PORT,
+  REDIS_PASSWORD,
   AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY,
   ASW_REGION,
