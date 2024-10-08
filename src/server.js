@@ -68,19 +68,8 @@ redis.on("connect", () => {
 redis.on("error", (err) => {
   console.log(`Redis connection error: ${err}`);
 });
-// const connectRedis = async () => {
-//   try {
-
-//     await redis.connect();
-//     console.log("connected to Redis successfully");
-//   } catch (error) {
-//     console.error("Failed to connect to Redis:", error);
-//   }
-// };
 
 await redis.flushdb();
-
-
 
 // const user = await redis.get("users");
 // console.log('user :>> ', user);
