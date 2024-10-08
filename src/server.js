@@ -78,7 +78,7 @@ redis.on("error", (err) => {
 //   }
 // };
 
-// await redis.flushdb();
+ await redis.flushdb();
 
 
 
